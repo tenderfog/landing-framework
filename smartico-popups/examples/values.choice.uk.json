@@ -1,0 +1,21 @@
+{
+  "locale": "uk",
+  "visual_state": "choice",
+  "title": "Обери наступну дію",
+  "description": "Обери зручний для себе варіант.",
+  "icon": {"checked": true},
+  "icon_url": "https://cdn.example.test/promos/shared/icon.a1b2.webp",
+  "icon_alt": "",
+  "primary_button": {"checked": true},
+  "primary_text": "Продовжити",
+  "primary_action": "dp:ok",
+  "secondary_button": {"checked": true},
+  "secondary_text": "Інший варіант",
+  "secondary_action": "dp:cancel",
+  "close_button": {"checked": true},
+  "close_label": "Закрити",
+  "close_action": "dp:close",
+  "layout": "fullscreen",
+  "entrance": {"checked": true},
+  "entrance_ms": "280"
+}

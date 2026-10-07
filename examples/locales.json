@@ -1,0 +1,36 @@
+{
+  "uk": {
+    "guestCta": "Зареєструватись",
+    "verificationCta": "Верифікуватись",
+    "verificationRequired": "Для участі пройди верифікацію.",
+    "availableCta": "Випробувати удачу",
+    "loading": "Завантажуємо стан спроби…",
+    "syncing": "Перевіряємо стан спроби…",
+    "cooldown": "Нова спроба через {time}",
+    "cooldownTooltip": "Повертайся через {time}",
+    "retry": "Спробувати ще раз",
+    "error": "Не вдалося завантажити стан. Спробуй ще раз.",
+    "ended": "Акцію завершено",
+    "soundOn": "Увімкнути звук",
+    "soundOff": "Вимкнути звук",
+    "gamesPrevious": "Попередні ігри",
+    "gamesNext": "Наступні ігри"
+  },
+  "en": {
+    "guestCta": "Sign up",
+    "verificationCta": "Verify account",
+    "verificationRequired": "Verify your account to participate.",
+    "availableCta": "Try your luck",
+    "loading": "Loading attempt status…",
+    "syncing": "Checking attempt status…",
+    "cooldown": "Next attempt in {time}",
+    "cooldownTooltip": "Come back in {time}",
+    "retry": "Try again",
+    "error": "Could not load the status. Please try again.",
+    "ended": "This promotion has ended",
+    "soundOn": "Enable sound",
+    "soundOff": "Mute sound",
+    "gamesPrevious": "Previous games",
+    "gamesNext": "Next games"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "locale": "en",
+  "visual_state": "information",
+  "title": "Choose your next game",
+  "description": "Open the supported product section.",
+  "icon": {"checked": false},
+  "icon_url": "",
+  "icon_alt": "",
+  "primary_button": {"checked": true},
+  "primary_text": "View bonuses",
+  "primary_action": "dp:go&url=https://product.example.test/event_action/bonuses",
+  "secondary_button": {"checked": false},
+  "secondary_text": "",
+  "secondary_action": "",
+  "close_button": {"checked": true},
+  "close_label": "Close",
+  "close_action": "dp:close",
+  "layout": "contained",
+  "entrance": {"checked": false},
+  "entrance_ms": "280"
+}

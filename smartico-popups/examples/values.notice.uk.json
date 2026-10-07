@@ -1,0 +1,21 @@
+{
+  "locale": "uk",
+  "visual_state": "notice",
+  "title": "Дякуємо за участь",
+  "description": "Цей стан показує повідомлення без основних кнопок.",
+  "icon": {"checked": false},
+  "icon_url": "",
+  "icon_alt": "",
+  "primary_button": {"checked": false},
+  "primary_text": "",
+  "primary_action": "",
+  "secondary_button": {"checked": false},
+  "secondary_text": "",
+  "secondary_action": "",
+  "close_button": {"checked": true},
+  "close_label": "Закрити",
+  "close_action": "dp:close",
+  "layout": "contained",
+  "entrance": {"checked": false},
+  "entrance_ms": "280"
+}

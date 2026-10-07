@@ -1,0 +1,83 @@
+[
+  {
+    "label": "Content",
+    "options": [
+      {
+        "name": "content",
+        "label": "Localized content",
+        "fields": [
+          {"name": "locale", "type": "text", "label": "Locale: uk / en", "value": "uk"},
+          {"name": "visual_state", "type": "text", "label": "State: information / choice / notice", "value": "information"},
+          {"name": "title", "type": "text", "label": "Title", "value": ""},
+          {"name": "description", "type": "text", "label": "Description", "value": ""}
+        ]
+      },
+      {
+        "name": "icon",
+        "label": "Icon",
+        "optional": true,
+        "optional_default": false,
+        "fields": [
+          {"name": "icon_url", "type": "image", "label": "Hosted icon URL", "value": ""},
+          {"name": "icon_alt", "type": "text", "label": "Accessible description; empty for decoration", "value": ""}
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Actions",
+    "options": [
+      {
+        "name": "primary_button",
+        "label": "Primary button",
+        "optional": true,
+        "optional_default": false,
+        "fields": [
+          {"name": "primary_text", "type": "text", "label": "Label", "value": ""},
+          {"name": "primary_action", "type": "url", "label": "Confirmed Smartico action", "value": ""}
+        ]
+      },
+      {
+        "name": "secondary_button",
+        "label": "Secondary button",
+        "optional": true,
+        "optional_default": false,
+        "fields": [
+          {"name": "secondary_text", "type": "text", "label": "Label", "value": ""},
+          {"name": "secondary_action", "type": "url", "label": "Confirmed Smartico action", "value": ""}
+        ]
+      },
+      {
+        "name": "close_button",
+        "label": "Explicit close control",
+        "optional": true,
+        "optional_default": false,
+        "fields": [
+          {"name": "close_label", "type": "text", "label": "Accessible label describing effect", "value": ""},
+          {"name": "close_action", "type": "url", "label": "Confirmed close engagement action", "value": ""}
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Appearance",
+    "options": [
+      {
+        "name": "presentation",
+        "label": "Presentation",
+        "fields": [
+          {"name": "layout", "type": "text", "label": "Layout: contained / fullscreen", "value": "contained"}
+        ]
+      },
+      {
+        "name": "entrance",
+        "label": "Entrance motion",
+        "optional": true,
+        "optional_default": false,
+        "fields": [
+          {"name": "entrance_ms", "type": "text", "label": "Duration, 120-800 ms", "value": "280"}
+        ]
+      }
+    ]
+  }
+]

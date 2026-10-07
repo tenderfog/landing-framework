@@ -1,6 +1,8 @@
 # Promo Landing Playbook
 
-Практичні інструкції для промо-лендінгів, які живуть на окремому домені й відкриваються у продуктовому iframe або App WebView. Пакет підготовлено 05.10.2026 на основі `landing_doc`, досвіду цієї переписки та перевірених технічних джерел; стандарт стеку оновлено 07.10.2026. Це версія `1.2.0` документації, а не дозвіл на реліз чи готова універсальна native-бібліотека.
+Практичні інструкції для промо-лендінгів, які живуть на окремому домені й відкриваються у продуктовому iframe або App WebView. Пакет підготовлено 05.10.2026 на основі `landing_doc`, практичного досвіду та перевірених технічних джерел; стандарт стеку оновлено 07.10.2026. Це публічна версія `1.2.1` документації, а не дозвіл на реліз чи готова універсальна native-бібліотека.
+
+Приклади не містять внутрішніх службових посилань, реальних ID кампаній або конфігурації конкретного середовища. Власні специфікації, entity map та приватні джерела зберігайте в project kit із відповідним доступом.
 
 **Обов’язковий стек лендінгу — Vue 3 + Nuxt 4.** Структура, TypeScript, статична генерація, campaign subpath та client lifecycle описані в [технічному стандарті](docs/00-technical-stack.md). Swift/RN залишаються native hosts; Smartico popup працює у своєму template engine.
 
@@ -57,7 +59,7 @@
 - [QA Web](templates/qa-web.md), [QA App](templates/qa-app.md), [release record](templates/release-record.md), [analytics plan](templates/analytics-plan.md).
 - [Campaign config](examples/campaign.config.json), [локалі](examples/locales.json), [navigation helper](examples/event-actions.mjs), [state/time helpers](examples/state-time.mjs), [пояснення runnable прикладів](examples/README.md).
 - [Native Smartico routing](examples/native-smartico-routing.md) — pseudocode, не готовий App patch.
-- [Halloween case study](case-studies/halloween-2026.md) — конкретні спостереження, а не defaults наступної кампанії.
+- [Анонімізований приклад щоденної промо](case-studies/daily-promo.md) — практичні спостереження, а не defaults наступної кампанії.
 
 ## Перевірка пакета
 
@@ -72,4 +74,4 @@ node smartico-popups/examples/check.mjs /absolute/path/to/tmpl.min.js
 
 ## Межі та походження
 
-[SOURCES.md](SOURCES.md) містить pinned основу, доступні первинні джерела й виправлені суперечності старих прикладів. Для SlotCity тут закріплено правило всіх navigation links через event actions; для іншого бренду потрібен власний підтверджений action registry. Аналітичний transport та додаткові native capabilities позначені як пропозиції до погодження. Відсутність App source не маскується готовим псевдопатчем.
+[SOURCES.md](SOURCES.md) містить pinned основу, доступні первинні джерела й виправлені суперечності старих прикладів. Для цього продуктового профілю закріплено правило всіх navigation links через event actions; кожен бренд підтверджує власний action registry. Аналітичний transport та додаткові native capabilities позначені як пропозиції до погодження. Відсутність App source не маскується готовим псевдопатчем.

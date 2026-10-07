@@ -1,0 +1,26 @@
+{
+  "recordedOn": "2026-10-05",
+  "scope": "Local documentation example compilation and markup; no live BO or device verification",
+  "engineSource": "https://libs.smartico.ai/jsi/js/tmpl.min.js",
+  "result": "PASS",
+  "fixtures": 3,
+  "stateLocaleLayoutButtonMatrix": 96,
+  "engineSha256": "480ab71e84984106b5a6beb6a7fe4c88caba1d2f1f6bc08c162f756738e4b1bd",
+  "bodySha256": "75261238979432e734fbfb7520727e22f896f164593662791d971b686b23c12c",
+  "bodyBytes": 5075,
+  "checked": [
+    "Configuration/Body/value key parity and strict input types",
+    "Actual tmpl('_template', params) entry path",
+    "Literal delimiter regression and escaped text",
+    "Missing/false/string optional flags; 0/1/2 buttons and explicit X",
+    "Confirmed example route; rejected unknown routes, credentials, query and path aliases",
+    "Neutral minimal params"
+  ],
+  "pending": [
+    "Actual BO schema, saved source and delivered creative",
+    "Network assets, CORS and CSP",
+    "Visual layout, focus management and host viewport bounds",
+    "SDK actions, Journey connectors and grants",
+    "Real Web, Swift WKWebView and RN Android WebView QA"
+  ]
+}

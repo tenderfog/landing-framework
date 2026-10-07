@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "exampleOnly": true,
+  "campaignId": "summer-promo-demo",
+  "publicPath": "/summer-promo-demo/",
+  "time": {
+    "zone": "Europe/Kyiv",
+    "startLocal": "2027-06-01T00:00:00",
+    "endExclusiveLocal": "2027-06-08T00:00:00",
+    "resetPolicy": "calendar-midnight",
+    "deadlineSource": "authoritative-state-or-confirmed-schedule"
+  },
+  "locale": {
+    "supported": ["uk", "en"],
+    "default": "uk",
+    "apiMapping": {"uk": "ua", "en": "en"}
+  },
+  "environment": {
+    "name": "stage-demo",
+    "productOrigin": "https://stage.example.test",
+    "landingOrigin": "https://landings.stage.example.test",
+    "allowedParentOrigins": ["https://stage.example.test"]
+  },
+  "actions": {
+    "auth": "event_action/auth",
+    "verification": "event_action/verif",
+    "bonuses": "event_action/bonuses",
+    "gamesCategory": "event_action/section/slots?subsection=for-bonuses"
+  },
+  "participation": {
+    "mode": "mission",
+    "mission": {"id": null, "taskId": null},
+    "clientActionAlternative": {
+      "name": "PROMO_SUMMER_ENTRY",
+      "payloadSchema": "must-be-confirmed-by-trigger-owner",
+      "stateReadContract": "must-be-confirmed-before-cooldown-ui"
+    },
+    "serverEligibilityOwner": "product-and-crm",
+    "repeatLimit": "one-per-calendar-cycle-if-approved",
+    "visualWaitMs": 5000,
+    "autoRetryActivation": false
+  },
+  "smartico": {
+    "environment": null,
+    "labelKey": null,
+    "brandKey": null,
+    "scriptUrl": null,
+    "journeyId": null,
+    "templateId": null,
+    "creativeIds": [],
+    "bonusIds": [],
+    "popupOwner": "host-integration"
+  },
+  "media": {
+    "video": {"mutedAutoplay": true, "posterRequired": true},
+    "smoke": {"enabled": true, "startAfterHero": true, "fallbackRequired": true}
+  },
+  "analytics": {"status": "planned", "forwardingEnabled": false},
+  "rules": {"approvedUrl": null, "enabled": false}
+}
