@@ -1,5 +1,7 @@
 # Стани користувача, верифікація та календар повторної участі
 
+Доповнення для prerequisite before opt-in, projection delay, state-preserving refresh і незалежних resets — [promo patterns](21-promo-patterns.md); exact API/update semantics — [Smartico state KB](../smartico-knowledge/02-missions-and-state.md). Unknown initial state і background refresh уже відомого same-user state мають різні UX policies; refresh не повинен руйнувати активний gesture або scene geometry.
+
 ## Registration і authentication — різні речі
 
 Лендінг зазвичай знає trusted auth context, а не факт існування акаунта для анонімного відвідувача. Зареєстрований, але неавторизований користувач і новий відвідувач — обидва `guest` для eligibility/API. Не шукати акаунт за email і не читати cross-origin cookies. Product auth dispatcher обирає registration/login відповідно до свого flow.

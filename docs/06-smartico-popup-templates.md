@@ -1,153 +1,79 @@
-# Smartico popup: reusable template та creatives
+# Legacy Smartico popup: Configuration, Body та actual runtime
 
-Popup створюється **в Smartico**, не як окрема модалка landing, яка симулює Journey. Локальний preview потрібний для розробки; результат для BO — Configuration JSON, Body HTML/CSS і params/asset values. JS додається лише за потреби та перевіреною підтримкою runtime.
+Це канонічний технічний runbook **підтриманих legacy templates**. Спочатку обрати [Vibe/legacy authoring](../smartico-knowledge/04-popups-and-routing.md); legacy compiler не перевіряє Vibe output. Дизайн робиться [за Figma](../smartico-popups/from-figma.md) або [за brief](../smartico-popups/from-brief.md), deliverables і acceptance визначає [спільний контракт](../smartico-popups/implementation-contract.md). Реальні parser/click/override баги й cleanup зібрані в [каталозі інцидентів](22-incidents-and-popup-cleanup.md).
 
-Спочатку встановити [action/branch contract](05b-smartico-journey-runbook.md). Рендерер не визначає виграш і не видає бонус. Native renderer доставляє той самий creative через [wrapper handshake](07-native-webview.md).
+## 1. Template, resource і параметри
 
-Окремі дизайн-процеси: [реалізація за готовою Figma](../smartico-popups/from-figma.md) і [самостійне проєктування з брифу](../smartico-popups/from-brief.md). Обидва використовують цей технічний runbook та [контракт передачі](../smartico-popups/implementation-contract.md). [Повний Configuration/Body/values приклад із actual compiler check](../smartico-popups/examples/README.md) доповнює фрагменти нижче.
+Template містить DOM/CSS та схему полів, resource/creative — content values і actions; Journey визначає source outcome, branch і grant. Одна compatible anatomy може обслуговувати кілька states/locales. Інша сума/title/icon не вимагає нового template, принципово інша структура може вимагати його.
 
-## 1. Розділити template, asset і campaign
+У поточному BO знайти existing template та всі bound resources/variations. Орієнтири legacy UI — Marketing → Templates → Popup і Assets → Popup; точні меню перевірити у вашому label. Для виправлення чинного popup змінювати actual entity: новий непідключений ID не виправить його delivery.
 
-| Об'єкт | Містить | Не містить |
-| --- | --- | --- |
-| Template | Структуру, responsive CSS, поля configuration, безпечні defaults | Жорстко закодовану винагороду/eligibility |
-| Popup asset / resource | Visual state, локалізований title/description, art URLs, texts/actions, flags | Окремий серверний generator виграшу |
-| Journey | Entry, branch, exact clicks, grant/caps, expiry, next popup/navigation | Копію верстки для кожного outcome |
+| Шар | Контракт |
+|---|---|
+| Configuration | Унікальні field names/types, optional groups, editor defaults |
+| Body | Читає params через `o`, задає scoped layout, escaped text і vendor hooks |
+| Resource values | Exact copy/art/actions/flags для погоджених state/locale |
+| Variation selection | Conditions, active/default fallback за [content variation contract](../smartico-knowledge/04-popups-and-routing.md) |
 
-Один template можна використовувати для reward/loss/information/pending за сумісного anatomy. Параметризувати icon, heading, description, locale, 0/1/2 buttons, labels/actions, explicit close, background, animation. Інша структура може виправдано мати інший template; «один для всього» не є самоціллю.
+`visual_state`, `locale`, `icon_url`, `primary_text` тощо — custom поля прикладу, не reserved API. Всі використані поля повинні існувати в Configuration; видалення поля потребує inventory старих overrides і consumers.
 
-У **Marketing → Templates → Popup** знайти сумісний існуючий template/офіційний example; у **Assets → Popup** створити потрібні resource variants. Назви розділів перевірити у поточному BO. Якщо задача — виправити чинний template, не створювати новий без потреби, бо Journey продовжить використовувати старий ID. [Smartico Popups](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/pop-up).
+### Optional, missing values та precedence
 
-## 2. Configuration та Body
+- `checked:false` вимикає блок; рядок `"false"` не boolean. Не використовувати loose truthiness для flags.
+- `optional_default` задає default редактора BO; реальну serialization params перевірити окремим sanitized fixture.
+- Effective creative values можуть перекривати Configuration defaults. Спочатку перевіряти їх, а не лише локальний Body.
+- Missing optional decoration може зникнути; missing required copy/action — pre-release error, а не default виграш.
+- У runnable example лише `{ "checked": true }` вмикає optional group; missing group вимкнений, blank description приховує paragraph, blank action приховує button. Required title перевіряється до release, навіть якщо runtime має neutral fallback.
+- Старі param shapes підтримуються тільки за явним compatibility contract.
 
-Configuration задає BO-поля, а шаблон читає params через `o`. `optional` керує видимістю; explicit checked=false відрізняється від відсутнього optional field. [Офіційний popup guide](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/pop-up) описує ці механізми.
+**Один канонічний кодовий комплект:** [Configuration + Body + values + checker](../smartico-popups/examples/README.md). Він замінює неповні snippets у дизайн-runbooks. Values JSON є реєстром полів, не гарантованим REST/BO import.
 
-Навчальний фрагмент конфігурації; не повний production template:
+## 2. Escaping і actual template compiler
 
-```json
-[
-  {
-    "label": "Content",
-    "options": [
-      {
-        "name": "title_block",
-        "label": "Title",
-        "fields": [{"name":"title","type":"text","label":"Text","value":""}]
-      },
-      {
-        "name": "primary_button",
-        "label": "Primary button",
-        "optional": true,
-        "optional_default": true,
-        "fields": [
-          {"name":"primary_text","type":"text","label":"Text","value":""},
-          {"name":"primary_action","type":"url","label":"Smartico action","value":"dp:ok"}
-        ]
-      }
-    ]
-  }
-]
-```
+Primary reference — [Smartico fork Blueimp engine](https://github.com/smarticoai/JavaScript-Templates). Перевірка ручного HTML з підставленими values не перевіряє vendor assembly.
 
-```html
-<!-- ПРИКЛАД: Configuration має визначати використані поля. -->
-<style>
-  .promo-popup { width: 100%; max-width: 40rem; }
-  .promo-popup__actions { display: grid; gap: 12px; }
-  @media (min-width: 640px) {
-    .promo-popup__actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-</style>
-<section class="promo-popup" role="dialog" aria-labelledby="promo-title">
-  <h2 id="promo-title">{%=o.title%}</h2>
-  {% if (o.primary_button && o.primary_button.checked) { %}
-    <div class="promo-popup__actions">
-      <a href="{%=o.primary_action%}" data-ao-hide-popup="true">
-        {%=o.primary_text%}
-      </a>
-    </div>
-  {% } %}
-</section>
-```
+Текст і href інтерполюються escaped `{%=...%}`; raw `{%#...%}` не застосовується до неперевіреного контенту. HTML escaping не є allowlist для URL scheme/origin, CSS values або dynamic HTML. До export перевірити actions та resource URLs за contract; дані не можуть містити tokens/secrets.
 
-У прикладі одна кнопка; production grid потрібно налаштувати за фактичною кількістю buttons, щоб одна не займала піврядка. Текст і href використовують escaped interpolation `{%=...%}`. Raw interpolation `{%#...%}` не застосовувати до неперевіреного контенту. CSS numbers/colors/URLs потребують власних допустимих значень, HTML escaping не робить довільний CSS безпечним.
+Після **кінцевої** мініфікації/export:
 
-## 3. Обов'язково тестувати actual template compiler
+1. Зафіксувати trusted delivered compiler URL/version/hash і wrapper. GitHub head не гарантує CDN bytes; для старого wrapper відтворити саме його перевірену версію.
+2. Викликати `tmpl('_template', params)` через actual template element/DOM assembly, не лише `tmpl(body, params)`.
+3. Перевірити всі states/locales, minimal/missing/null/escaped/long values, 0/1/2 actions і explicit optional=false.
+4. У literal CSS/HTML/JS не допустити випадкових `{%` / `%}`. Приклад небезпеки — minified `height:100%}`; safe literal `height: 100%; }`. Не робити глобальну replace, що руйнує справжні template blocks.
+5. Якщо Body вкладено у `<script type="text/x-tmpl">`, literal closing script tag не має завершити outer raw-text element до compilation. Custom JS потребує перевіреної template-safe assembly; перевіряти source і rendered output окремо.
+6. Підтвердити nonempty root, exact texts/actions і відсутність compile/runtime errors. Для affected JavaScriptCore issue додати перевірку відповідної engine family за [incident recipe](22-incidents-and-popup-cleanup.md).
 
-Smartico використовує Blueimp engine; [Smartico fork](https://github.com/smarticoai/JavaScript-Templates) — primary reference. HTML preview після ручної підстановки даних не тестує цей engine.
+Два відтворені parser механізми, original-delivery proof limits та мінімальні патчі описані тільки в [каталозі інцидентів](22-incidents-and-popup-cleanup.md). Local engine PASS не перекреслює фізичний failure.
 
-У досвіді проєкту App-розробник повідомив про порожній creative root після успішного handshake та `tmpl()` SyntaxError. Окремий контрольований regression відтворив небезпеку literal minified CSS `height:100%}` із delimiter `%}`: compilation через `new Function` падала **до** `innerHTML`. Exact failing delivered template не отримано, тому цей тест доводить механізм помилки, а не незалежно встановлену причину конкретної доставки. Це regression для даного engine, не специфічна помилка Swift.
+## 3. Assets та budget
 
-```html
-<!-- НЕБЕЗПЕЧНИЙ literal для {% %} engine -->
-<style>.art{height:100%}</style>
+Art/fonts віддавати перевіреними зовнішніми HTTPS URL через values/defaults; великі embedded base64 збільшують compilation input, дублюються в creatives й не кешуються окремо. Зберігати dimensions, source/derivative і locale у [asset register](../templates/asset-register.md).
 
-<!-- Delimiter-safe CSS -->
-<style>.art { height: 100%; }</style>
-```
+Перевірити content type, origin allowlist/CSP, font CORS, cold/warm loading і URL lifetime. Навігаційне правило event_action не застосовується до `img src`, fonts/video/API resource requests. Hashed assets можуть мати довгий immutable cache; змінні Body/config мають власний update policy. Shared assets не видаляти без inventory активних consumers.
 
-Після остаточної мініфікації/експорту перевірити:
+Вимірювати окремо Body/config bytes і gzip, external critical transfer, decoded media memory та runtime/GPU work. Локальний gzip не доводить фактичний SDK transfer size. Розмір або бюджет старої модалки не є default наступної.
 
-1. Compilation самим runtime engine або його перевіреною identical версією.
-2. Browser entry path `tmpl('_template', params)` через actual template element, не тільки `tmpl(body, params)`.
-3. Кожен visual state, minimal params, missing optional fields, 0/1/2 buttons, long text, custom icon/action й усі supported locales.
-4. В literal CSS/HTML/JS немає випадкових `{%`/`%}`. Не робити глобальну replace, яка руйнує справжні template blocks.
-5. Якщо Body потрапляє у `<script type="text/x-tmpl">`, буквальний closing `</script>` не має достроково завершити його raw-text element. Для custom JS застосувати перевірений serializer/template-safe assembly та перевірити кінцевий source.
-6. Видимий root не порожній, titles/actions exact, assets loaded, немає runtime errors.
+## 4. Vendor hooks і один sender
 
-Завантажити saved Body із BO після publish й порівняти з локальним експортом, включно з hash/byte size. Якщо старий wrapper/engine відрізняється, відтворити саме його версію; local npm pass не перекреслює real-device failure.
+Для підтриманого legacy HTML hook використати `href` + `data-ao-hide-popup="true"`; зберегти exact `dp:*`, які очікує Journey. Не виконувати ту саму дію паралельним `_smartico.dp()` listener або парою touch/click senders. Engagement click, named Client Action й product navigation розрізняються в [routing KB](../smartico-knowledge/04-popups-and-routing.md).
 
-## 4. Зовнішні assets замість base64
+Guard допускається лише за перевіреної propagation/recovery policy: перший click доходить до штатного handler; повторні mixed clicks не запускають другу операцію. Permanent latch до vendor acceptance може позбавити користувача retry. Guard не забезпечує server cap/idempotency й не підміняє socket report; правильна policy та conflicting incidents — у [22](22-incidents-and-popup-cleanup.md).
 
-Статичні WebP/AVIF/PNG/SVG і WOFF2 віддавати перевіреними HTTPS URL через params/defaults. Не вшивати великі base64 картинки/шрифти у Body: вони збільшують template compilation input, не кешуються окремо та дублюються в creatives.
+Весь видимий CTA — semantic hit target; decorative descendants не перехоплюють pointer events. Native Back/backdrop/Escape та focus/scroll cleanup належать outer host. Explicit close-and-claim виконується лише через погоджений control, а не passive teardown. Для навігації використати supported `dp:go`→event_action route і [native dispatcher](07-native-webview.md); новий analytics producer у Body не додається без чинного [collection contract](12-analytics.md).
 
-```json
-{
-  "locale": "uk",
-  "visual_state": "reward",
-  "title": "Твоя винагорода готова",
-  "description": "Обери наступну дію",
-  "icon_url": "https://cdn.example/promos/shared/reward.a1b2.webp",
-  "font_url": "https://cdn.example/fonts/brand-cyrillic.c3d4.woff2",
-  "primary_button": {"checked":true},
-  "primary_text": "Забрати",
-  "primary_action": "dp:ok"
-}
-```
+## 5. Responsive content та outer bounds
 
-Це приклад params shape, який має збігатися з вашим Configuration, не універсальні Smartico reserved fields.
+- Живі labels, `minmax(0, 1fr)`, content width із spec, safe areas і scrollable overflow для довгого/низького viewport.
+- Grid залежить від actual count: 0 прибирає actions container, 1 має завершений рядок, 2 — погоджені columns/stack. Breakpoint визначає content width, не UA.
+- Decorative skin: пропорційні caps, stretch/repeat middle, окремий ornament і live label. Довгий текст збільшує висоту; bitmap із текстом не розтягується.
+- Fullscreen перевіряється outer SDK/native view → wrapper → creative. Child `100vw`, `position:fixed` і z-index не розширюють outer frame.
+- Scoped overrides конкретного wrapper допускаються після огляду. Відомий root `#__root_centered`, shrink-wrap/zoom чи `fitscale` — implementation detail, не універсальний public API; не переносити global DOM hacks і не вимагати `:has()` без support matrix.
+- Ніякого подвійного scaling, що зменшує текст/targets. Motion не блокує зміст/controls; reduced motion і static fallback обов'язково перевірити. WebGL не копіюється з landing автоматично.
 
-Перевірити content types, allowlisted resource origins/CSP, font CORS, cached/uncached loading і URL stability протягом активної кампанії. Resource request — звичайний asset URL; правило `event_action` стосується **навігації**, не `img src`, font чи video.
+Загальні [responsive/a11y](09-responsive-ui.md), [media/performance](10-media-animation-webgl.md) та [localization](16-localization.md) правила застосовуються без повторної копії в кожному дизайн-процесі.
 
-Ресурси за hashed URL отримують довгий immutable cache, змінний Configuration/Body — правильний update policy. Не ламати старі campaigns видаленням shared asset. Розмір Body, external bytes, gzip та network load вимірювати окремо; gzip локального файлу не доказ transfer size SDK.
+## 6. Save/readback/delivery
 
-## 5. Дії та duplicate guard
+Передача та єдина acceptance matrix — [implementation contract](../smartico-popups/implementation-contract.md). Для legacy save Configuration+Body в потрібний template, values у всі потрібні resources/variations; re-open/download і звірити bytes/hash/effective params. BO Preview, fresh Web Send Preview й actual Swift/RN delivery мають окремі результати.
 
-Офіційний action hook для HTML buttons — `href` + `data-ao-hide-popup="true"`; Smartico обробляє click/close. Не виконувати той самий deep link додатковим `_smartico.dp()` listener. Preserve `dp:ok`, `dp:cancel`, `dp:action` і exact custom controls, які очікує Journey.
-
-Локальний guard, якщо потрібний, пропускає **перший** click до Smartico незмінним і блокує наступні mixed/double clicks. Він не видає бонус і не підміняє socket report. Native Back/backdrop/Escape policy належить outer host; DOM listener не гарантує її. Close-and-claim працює тільки через explicit agreed action, не пасивне teardown.
-
-У navigational CTA використовувати `dp:go&url=<product>/event_action/...` і підтриманий route registry. Native `bcid:4`/Journey `cid:105` мають пройти [спільний router](../examples/native-smartico-routing.md).
-
-## 6. Адаптивна верстка й fullscreen
-
-Живий текст, `minmax(0,1fr)`, перевірена максимальна ширина, safe areas, scrollable overflow для довгого контенту. Desktop 2 columns/mobile stack — contract конкретного дизайн-компонента; breakpoint обрати за доступною шириною, не лише за UA.
-
-Для decorative buttons використовувати CSS skin або 3-/9-slice: fixed proportional end caps, stretchable middle, окремий ornament, живий текст. Не розтягувати bitmap із текстом/декором на будь-яку ширину. Single button — centered, no buttons — actions container absent. Long labels мають збільшувати висоту.
-
-Fullscreen має три шари: SDK/native outer view → centering wrapper → creative. Якщо outer iframe/WKWebView обмежений, `100vw`, `position:fixed` та `z-index` child не вийдуть за нього. Outer host повинен віддати full viewport.
-
-Відомі frame style params чи root override застосувати тільки після огляду **вашого** wrapper. У проєкті shrink-wrap/zoom внутрішнього `#__root_centered` виправляв scoped CSS; це не універсальний public API. Не глобально змінювати Smartico DOM і не покладатися лише на `:has()` без support matrix. `fitscale` може зменшувати текст/кнопки; для responsive fullscreen уникати подвійного scaling.
-
-Складні WebGL ефекти не копіювати з landing у кожен popup автоматично. Коротка entrance `transform/opacity` часто достатня. Reduced motion, низька висота, tablet split view, portrait/landscape й long translations перевіряються за [QA](13-qa.md) і [localization](16-localization.md).
-
-## 7. Доставка в BO й перевірка
-
-- Save Configuration + Body у **той самий** approved template; re-open/download.
-- Зберегти resource values кожного state й locale; public copy exact з approved design.
-- BO Preview → реальна web Send Preview → actual Swift/RN wrapper; результати записувати окремо.
-- Показати контент/root, images/fonts, 0/1/2 buttons, actual viewport, close semantics.
-- Пройти action report → exact connector → confirmed grant/failure → route, а не лише screenshot.
-- У release inventory записати template/asset IDs, version/hash, external origins, current runtime, unresolved support.
-
-Не виводити гравцю назви Smartico, SDK, IDs, QA instructions або технічний timeout text. Службовий description у BO й player description — різні поля.
+Старий відкритий popup може виконувати старий код. Нова локальна Body не змінює saved defaults/overrides або вже доставлений engagement. Звіряти template/resource links кожної activity; compiler/visible DOM, click/connector, grant/failure і route доводяться окремо.

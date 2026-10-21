@@ -1,6 +1,21 @@
 # Джерела, версії та межі застосування
 
-Це **публічна редакція 1.2.1** універсального playbook. Вона містить публічні технічні джерела, навчальні приклади та узагальнені висновки. Внутрішні специфікації, посилання на задачі й макети, ідентифікатори CRM та записи конкретних середовищ команда зберігає у приватному пакеті свого проєкту.
+Це **публічна редакція 2.0.0 від 21.10.2026** універсального framework. Baseline 1.2.1 — commit `3f2e7cdab14d678ddb9183426c8e0928b864066a` цього repo. Редакція містить публічні технічні джерела, навчальні приклади та узагальнені висновки. Внутрішні специфікації, посилання на задачі й макети, ідентифікатори CRM та записи конкретних середовищ команда зберігає у приватному пакеті свого проєкту.
+
+## Оновлення 21.10.2026: походження нового знання
+
+Порівняно повну змістовну історію двох реалізацій за 30.09–20.10.2026: проєктування, зміни механік, debugging/cleanup, QA, rollout та аналітику. Обидва referenced chats спочатку прочитані штатним `read_thread`; oversized turns не проходили навіть по одному, тому старі user/assistant повідомлення відновлено read-only з exact local session transcripts з перевіреним thread ID. Заяви асистента не прирівнювались до незалежних тестів; критичні висновки зіставлено із збереженими source, QA/size/compiler reports і config readback, де вони доступні.
+
+Приватний audit trail лишається поза публічним repo. У framework перенесено узагальнені patterns і incident recipes, без кампейнних URLs/IDs. Нове live CRM/device QA під час документального дослідження не виконувалося; статус historical browser/device evidence збережено, а неперевірені гарантії явно обмежено.
+
+| Тип зміни | Що додано / виправлено |
+|---|---|
+| Нові reusable правила | Prerequisite до consumption point, informational/core flow separation, eventual consistency, backfill isolation, marker/write ordering, queue/caps/re-entry boundaries |
+| Поглиблення наявного | Compiler і JavaScriptCore cases, cleanup, stale creative overrides, click propagation, X/passive semantics, graph migration, host scroll/focus, reporting |
+| Суперечності попередній редакції | DOM-only measurement contract проти старого programmatic proposal; action-only sender side effects; current Vibe authoring проти unconditional legacy template default |
+| Організація для майбутнього reuse | Landing/widget workflows, product profiles, investigation records, source catalog і протокол наступної відповіді |
+
+Поточні Smartico primary джерела, pinned revisions та індивідуальний статус доступності наведені у [Smartico SOURCES](smartico-knowledge/SOURCES.md). Там окремо позначені **прочитано**, **історичний snapshot**, **недоступно** та **маршрут для майбутнього читання**. Не вважати кожне посилання перевіреним або кожну documented capability увімкненою в tenant.
 
 Обов’язковий стек лендінгів — **Vue 3 + Nuxt 4**. [Технічний стандарт](docs/00-technical-stack.md) описує framework, lifecycle та generated static output. Документація не мігрує чинні акції автоматично; exact dependency versions кожний проєкт фіксує своїм lockfile. API, host-контракти й UI Back Office потрібно повторно перевіряти для підтримуваних версій.
 
@@ -9,8 +24,8 @@
 | Джерело | Зафіксована версія | Використано |
 |---|---|---|
 | [onlineTeran/landing_doc](https://github.com/onlineTeran/landing_doc/) | Public snapshot `14f93e5c1f16ff349a52f10ec1c5bd1c2db47030` | discovery, design/copy/assets, product event actions, iframe bridge, analytics ownership, release |
-| Узагальнені інтеграційні висновки | [Анонімізований приклад щоденної акції](case-studies/daily-promo.md) | lifecycle, verification, календарний reset, cache, media та popup rendering |
-| Узгоджена схема назв аналітичних подій | `ga_{модуль}_{дія}_{елемент/результат}` | naming convention; словник конкретної кампанії, transport і validation suffix потребують окремого погодження |
+| Узагальнені інтеграційні висновки | [Incident catalog](docs/22-incidents-and-popup-cleanup.md), [patterns](docs/21-promo-patterns.md); private evidence audit 21.10.2026 | Actual cause/fix/proof limits та композиція наступних механік |
+| Історична аналітична конвенція | `ga_{модуль}_{дія}_{елемент/результат}` | Vocabulary reference; actual DOM/GTM/programmatic contract має пріоритет. Exact inventory — у project analytics plan |
 
 Пакет не копіює всю документацію upstream і не змінює вихідний repo. Він зберігає правила та приклади для embedded промо. У новій кампанії команда фіксує власну підтримувану версію bridge і звіряє її з host-контрактом; історичний snapshot не гарантує сумісності з майбутніми збірками.
 
@@ -43,21 +58,10 @@
 
 Для кожного запису додати owner, reviewed version, дату перевірки та статус `Contract`, `Observed`, `Example`, `Proposed` або `Unknown`. Не переносити внутрішні URLs, account identifiers, credentials чи raw profiles до публічної документації. Якщо затвердженого контракту немає, позначити це як невідоме, а не вигадувати API або route.
 
-## Уточнення до старих прикладів
+## Межі історичних прикладів
 
-| Старий приклад або припущення | Актуальне правило пакета |
-|---|---|
-| Raw product/external fallback href | Для цього профілю всі navigation links — підтверджений event_action; media/API URLs звичайні. |
-| `analytics_event` прямо у canonical bridge | Не існує в чинній schema; forwarding disabled до host/native контракту. |
-| User change = завжди reload | Потрібен documented SDK/adapter lifecycle для поточної версії; не використовувати старий identify=true. Reload може бути fallback, не єдина архітектура. |
-| Nuxt3, довільний framework або standalone HTML/JS як defaults | Обов’язкові Vue 3 + Nuxt 4; default delivery — generated static output. Corporate target та current CI беруться з repo, Vercel не є обов’язковим hosting. |
-| Activation+24h / reload+nextmidnight | Authoritative current cycle + confirmed calendar reset; прострочений consumed record викликає refresh, не новий день. |
-| `next_recurrence_date_ts` завжди є в public schema | Поле/units перевіряються в фактичній підтриманій API response; не використовувати як універсально гарантоване. |
-| `dp:action` завжди Client Action | Engagement control та named Client Action залежать від handler і explicit contract. |
-| `alpha:false` завжди швидше і гарантує WebView black background | Opaque output/dark base перевіряються на реальному GPU/WebView; режим context вимірюється, fallback обов'язковий. |
-| Мобільний Chrome = App QA | Потрібні actual WKWebView та Android RN WebView builds. |
-| Product `ga_*` name можна напряму віддати Firebase | Swift/Android Firebase резервують `ga_`; підтримати погоджений mapping product event → destination event у measurement adapter. |
+Виправлення старих припущень зафіксовані у [CHANGELOG](CHANGELOG.md). Чинні правила мають одного власника: [stack](docs/00-technical-stack.md), [bridge](docs/02-iframe-and-contracts.md), [navigation](docs/03-event-actions.md), [state/time](docs/04-state-and-time.md), [media](docs/10-media-animation-webgl.md), [analytics](docs/12-analytics.md) та [Smartico KB](smartico-knowledge/README.md). Історичний snippet не перекриває ці контракти; перед reuse звірити supported product/runtime version.
 
 ## Evidence vocabulary
 
-Contract / Observed / Example / Proposed / Unknown визначені в [discovery](docs/01-discovery-and-sources.md). Прийняття результату користувачем не замінює окремий device/build proof для кожного підтримуваного сценарію.
+Contract / Documented / Observed / Example / Proposed / Unknown визначені в [discovery](docs/01-discovery-and-sources.md). Прийняття результату користувачем не замінює окремий device/build proof для кожного підтримуваного сценарію.

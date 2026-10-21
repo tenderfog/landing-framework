@@ -1,35 +1,18 @@
-# Реалізація модалок Smartico
+# Smartico popups: дизайн, реалізація й передача
 
-Окремий пакет для створення **Smartico Popup Template**, його creatives та перевірки показу у Web, Swift WKWebView і React Native Android WebView. В обох сценаріях результат завантажується у Smartico. Самостійна реалізація означає проєктування за брифом без готового макета; вона також завершується Smartico template.
+Точка входу для popup-задач. Спочатку визначити [authoring mode у KB](../smartico-knowledge/04-popups-and-routing.md): поточні vendor docs рекомендують Vibe для нових popup, а existing Configuration/Body templates мають окремий legacy contract. Доступність перевіряється в конкретному label; автоматична міграція не потрібна.
 
-## Обрати сценарій
+| Задача | Канонічний документ |
+|---|---|
+| Є approved Figma | [Figma → design mapping](from-figma.md) |
+| Є business brief, але немає макета | [Visual spec із brief](from-brief.md) |
+| Скопіювати поля конкретної задачі | [Popup brief](templates/popup-brief.md) |
+| Що саме передати й чим довести готовність | [Implementation/acceptance contract](implementation-contract.md) |
+| Legacy fields, Body, compiler, hooks, layout | [Технічний runbook](../docs/06-smartico-popup-templates.md) |
+| Один повний executable legacy приклад | [Configuration/Body/values + checker](examples/README.md) |
+| Delivery, queue, routing, native ownership | [Popup knowledge base](../smartico-knowledge/04-popups-and-routing.md) |
+| Bugfix, reconfiguration, видалення зайвого коду | [Incident catalog і cleanup](../docs/22-incidents-and-popup-cleanup.md) |
 
-| Вхідні матеріали | Інструкція | Що має з'явитися перед версткою |
-|---|---|---|
-| Готові Figma nodes, desktop/mobile, visual states | [За дизайном Figma](from-figma.md) | Реєстр variants, точний copy, tokens, exports і таблиця actions |
-| Бізнес-бриф, механіка й brand constraints без готового дизайну | [Самостійне проєктування](from-brief.md) | Структура, тексти, responsive visual proposal і таблиця actions |
+Читати лише обраний дизайн-процес; спільні runtime правила та acceptance не копіюються в нього. Послідовність: **sources/brief → copy/actions → дизайн → mode-specific implementation → save/readback → real delivery/QA**. [Переносна навичка](../skills/smartico-popup-templates/SKILL.md) спеціалізується на legacy.
 
-Далі обидва сценарії використовують [контракт реалізації](implementation-contract.md), [технічний popup runbook](../docs/06-smartico-popup-templates.md) і [навичку агента](../skills/smartico-popup-templates/SKILL.md). Не потрібно читати обидва дизайн-сценарії для кожного завдання.
-
-## Мінімальний комплект результату
-
-1. `configuration.json` — поля BO, типи, defaults, optional blocks; internal labels і names латиницею.
-2. `body.html` — HTML/CSS із синтаксисом фактичного `tmpl`, живими текстами й action hooks Smartico.
-3. `values.<state>.<locale>.json` — повний набір значень кожного creative; ключі узгоджені з Configuration. Формат імпорту values перевірити у вашому BO, JSON може бути реєстром для ручного заповнення.
-4. Реєстр ресурсів — HTTPS URL, dimensions, format, bytes, cache/CORS, locale та походження.
-5. Таблиця поведінки — primary, secondary, X, backdrop, Escape і native Back; точний connector або навігація, без припущення про grant.
-6. QA та delivery record — template/creative IDs після створення, version/hash, engine, responsive screenshots, actual Web/App результати й невирішені залежності.
-
-Один template обслуговує кілька creatives за однакової структури. Journey обирає creative та визначає результат. Body відображає вже передані дані й передає натискання через підтриманий hook. [Місії та Journey](../docs/05-smartico-missions-journeys.md) налаштовуються окремо від верстки.
-
-## Повний навчальний приклад
-
-[Приклад Configuration + Body + values + compiler check](examples/README.md) можна використати як старт для нового template. Він демонструє optional icon, 0/1/2 кнопки, явний X, mobile stack, desktop columns, escaping і reduced motion. Його conditional blocks справді компілюються Smartico engine; виграш чи видачу бонуса приклад не реалізує. Умовні CDN/product origins замінюються підтвердженими ресурсами та routes до завантаження у BO.
-
-Для нової модалки скопіюй [brief](templates/popup-brief.md) у її repo, заповни дизайн-сценарій і контракт. Local preview — розробницький fixture; перевірка завершується saved template у Smartico й доставленим creative на потрібних платформах.
-
-## Послідовність роботи
-
-`Джерела / бриф → copy та action matrix → дизайн → params і assets → Body → actual tmpl check → Smartico Template → Creatives → Journey binding → Web / App QA`
-
-Якщо завдання — виправити існуючу модалку, спочатку встанови, який template ID реально використовують її creatives та Journey. Зміна іншого локального файла або нового не підключеного template не виправляє доставлений popup.
+Для правки existing popup спочатку знайти actual template/resource/variation та Journey references. Зміна непідключеного локального файла не змінює доставлений popup. Local preview не замінює saved resource й actual Web/App evidence за контрактом.

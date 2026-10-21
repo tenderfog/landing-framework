@@ -12,7 +12,7 @@ description: "Спроєктувати, налаштувати або перев
 1. Перевірити ENV/Label/Brand та task scope. Знайти existing flow, зберегти before-state й IDs; не створювати duplicate Journey, якщо треба його виправити.
 2. Оформити action/grant matrix до edit: точний entry, eligibility, repeat policy, branches, explicit X/claim/risk/passive close, failures/expiry, navigation.
 3. Вибрати Mission або Client Action entry за actual contract, відфільтрувати exact mission/task/name. Не надсилати два triggers для одного intent «для надійності».
-4. Налаштувати Draft flow з reusable template assets. Версії/ймовірності/re-entry modes/caps беруться зі spec; не переносити параметри іншої акції або Stop-and-Start як універсальне правило.
+4. Налаштувати Draft flow з actual popup resources обраного [Vibe/legacy mode](../../smartico-knowledge/04-popups-and-routing.md). Версії/ймовірності/re-entry modes/caps беруться зі spec; не переносити параметри іншої акції або Stop-and-Start як універсальне правило.
 5. Click connectors exact; взаємовиключні choices закривають original engagement. Server caps/idempotency обов'язкові для grant; local disabled не замінює їх.
 6. Вибрати certified bonus IDs. Claim/X одного reward не потребують різних bonus entities. Навігація лише після supported confirmed-grant output; failure/pending не успіх.
 7. Усі navigation targets — supported event actions; preserve `dp:ok/cancel/action` controls. [Native router](../../examples/native-smartico-routing.md) має бути підтверджений для App.

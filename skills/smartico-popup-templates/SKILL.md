@@ -5,6 +5,8 @@ description: "Зібрати або виправити reusable Smartico Popup C
 
 # Smartico Popup Templates
 
+Ця навичка спеціалізується на **legacy Configuration/Body**. До нового popup перевірити [актуальну KB](../../smartico-knowledge/README.md): vendor docs станом на 21.10.2026 рекомендують Vibe Studio; наявні templates працюють. Для Vibe використати supported authoring і actual Flow exits, не вигадувати legacy export. Для bugfix/cleanup почати з [incident catalog](../../docs/22-incidents-and-popup-cleanup.md) і порівняти published Body, defaults та creative overrides.
+
 Обрати маршрут із [окремого пакета](../../smartico-popups/README.md): готовий макет → [Figma runbook](../../smartico-popups/from-figma.md); бриф без макета → [самостійне проєктування](../../smartico-popups/from-brief.md). Спільні правила — [implementation contract](../../smartico-popups/implementation-contract.md) та [popup runbook](../../docs/06-smartico-popup-templates.md). Для actions потрібні [Journey contract](../../docs/05b-smartico-journey-runbook.md) і [Client Action nuance](../../docs/05c-smartico-client-actions.md); native runtime — [WebView](../../docs/07-native-webview.md).
 
 ## Виконання

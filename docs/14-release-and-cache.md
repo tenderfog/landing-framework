@@ -146,10 +146,10 @@ Directory redirect без slash може неправильно загубити
 
 Зміна файлів у landing repo не змінює creative body чи Journey у Smartico. Release record має містити template/creative/mission/Journey version та реальні publish steps, якщо вони входять у scope.
 
-Після публікації template:
+Після публікації popup resource:
 
-1. Отримати actual published body/config і звірити з reviewable source.
-2. Прогнати actual engine compile/render matrix.
+1. Отримати actual published Body/config для legacy або saved design/output для іншого mode й звірити з reviewable version.
+2. Виконати mode-specific runtime acceptance за [popup contract](../smartico-popups/implementation-contract.md); legacy compiler details — [06](06-smartico-popup-templates.md).
 3. Перевірити assets/font URLs із реального popup origin.
 4. Перевірити branch actions та close semantics.
 5. Перевірити actual Web/App rendering; handshake/impression не замінює render evidence.

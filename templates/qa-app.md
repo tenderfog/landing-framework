@@ -30,7 +30,9 @@
 | A09 | Video cached/cold/autoplay/audio | Inline video, poster sync, user sound toggle, manual fallback | TODO / TODO |
 | A10 | WebGL+fallback на actual GPU | Correct brand background, no seams/rectangles; failures keep readable content | TODO / TODO |
 | A11 | Carousel/touch/lazy-load/reduced motion | Swipe/pause, bounded initial requests, no offscreen/background work | TODO / TODO |
-| A12 | Analytics, якщо capability є | Product `ga_*` dictionary + approved destination mapping без Firebase reserved prefixes; native channel/consent/dedupe; modal-show owner один, successful має authoritative source; інакше NOT_TESTED | TODO / TODO |
+| A12 | Analytics, якщо capability є | Обраний DOM/SDK/native contract з actual receiver; approved destination names/types без Firebase reserved prefixes; consent/dedupe; successful має authoritative source; інакше NOT_TESTED | TODO / TODO |
+| A13 | Prerequisite/каса/повернення/повторні кліки | Missing prerequisite без consumption; delayed state reread; no popup burst; first tap і scroll після close | TODO / TODO |
+| A14 | Clean popup release variant | Actual delivered Body/config; visible root і всі hit areas; no diagnostic observer dependency; passive close/X за contract | TODO / TODO |
 
 **Popup діагностика:** engagement/socket event → popup URL → PAGE_READY → engagement → READY_TO_BE_SHOWN → impression → template compile/root/asset load. Завершений handshake не замінює render evidence.
 
