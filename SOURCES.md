@@ -1,6 +1,21 @@
 # Джерела, версії та межі застосування
 
-Це **публічна редакція 1.2.1** універсального playbook. Вона містить публічні технічні джерела, навчальні приклади та узагальнені висновки. Внутрішні специфікації, посилання на задачі й макети, ідентифікатори CRM та записи конкретних середовищ команда зберігає у приватному пакеті свого проєкту.
+Це **публічна редакція 2.0.0 від 21.10.2026** універсального framework. Baseline 1.2.1 — commit `3f2e7cdab14d678ddb9183426c8e0928b864066a` цього repo. Редакція містить публічні технічні джерела, навчальні приклади та узагальнені висновки. Внутрішні специфікації, посилання на задачі й макети, ідентифікатори CRM та записи конкретних середовищ команда зберігає у приватному пакеті свого проєкту.
+
+## Оновлення 21.10.2026: походження нового знання
+
+Порівняно повну змістовну історію двох реалізацій за 30.09–20.10.2026: проєктування, зміни механік, debugging/cleanup, QA, rollout та аналітику. Обидва referenced chats спочатку прочитані штатним `read_thread`; oversized turns не проходили навіть по одному, тому старі user/assistant повідомлення відновлено read-only з exact local session transcripts з перевіреним thread ID. Заяви асистента не прирівнювались до незалежних тестів; критичні висновки зіставлено із збереженими source, QA/size/compiler reports і config readback, де вони доступні.
+
+Приватний audit trail лишається поза публічним repo. У framework перенесено узагальнені patterns і incident recipes, без кампейнних URLs/IDs. Нове live CRM/device QA під час документального дослідження не виконувалося; статус historical browser/device evidence збережено, а неперевірені гарантії явно обмежено.
+
+| Тип зміни | Що додано / виправлено |
+|---|---|
+| Нові reusable правила | Prerequisite до consumption point, informational/core flow separation, eventual consistency, backfill isolation, marker/write ordering, queue/caps/re-entry boundaries |
+| Поглиблення наявного | Compiler і JavaScriptCore cases, cleanup, stale creative overrides, click propagation, X/passive semantics, graph migration, host scroll/focus, reporting |
+| Суперечності попередній редакції | DOM-only measurement contract проти старого programmatic proposal; action-only sender side effects; current Vibe authoring проти unconditional legacy template default |
+| Організація для майбутнього reuse | Landing/widget workflows, product profiles, investigation records, source catalog і протокол наступної відповіді |
+
+Поточні Smartico primary джерела, pinned revisions та індивідуальний статус доступності наведені у [Smartico SOURCES](smartico-knowledge/SOURCES.md). Там окремо позначені **прочитано**, **історичний snapshot**, **недоступно** та **маршрут для майбутнього читання**. Не вважати кожне посилання перевіреним або кожну documented capability увімкненою в tenant.
 
 Обов’язковий стек лендінгів — **Vue 3 + Nuxt 4**. [Технічний стандарт](docs/00-technical-stack.md) описує framework, lifecycle та generated static output. Документація не мігрує чинні акції автоматично; exact dependency versions кожний проєкт фіксує своїм lockfile. API, host-контракти й UI Back Office потрібно повторно перевіряти для підтримуваних версій.
 
@@ -60,4 +75,4 @@
 
 ## Evidence vocabulary
 
-Contract / Observed / Example / Proposed / Unknown визначені в [discovery](docs/01-discovery-and-sources.md). Прийняття результату користувачем не замінює окремий device/build proof для кожного підтримуваного сценарію.
+Contract / Documented / Observed / Example / Proposed / Unknown визначені в [discovery](docs/01-discovery-and-sources.md). Прийняття результату користувачем не замінює окремий device/build proof для кожного підтримуваного сценарію.

@@ -2,6 +2,12 @@
 
 **Статус:** `<proposal | approved contract | implemented Stage | verified Prod>`
 
+## Collection mode — вибрати до решти таблиць
+
+`DOM hooks/GTM | programmatic events | native collector`: ___. Чинний source/version/owner: ___.
+
+У DOM-only mode передати exact `data-gtm-id` inventory, placement/trigger, collector для кожного document/iframe, dynamic-node/visibility rules, consent/dedupe і actual receiver QA. Не реалізовувати власний send/dataLayer producer й не додавати auth/state/timing params з програмних прикладів без contract. Усі payload/retry/destination sections нижче заповнюються лише якщо вони належать обраному mode. [Вибір контракту](../docs/12-analytics.md).
+
 Не позначати implemented до реальної доставки подій. Не додавати новий message type до canonical iframe bridge без host contract. Emitted names використовують надану конвенцію аналітика `ga_{module/modal}_{action}_{element/result}`; generic internal intent не є другою analytics event.
 
 Це product/adapter names. Firebase Swift/Android резервують `ga_` для SDK event names: destination mapping погоджується окремо; без нього не forward напряму в native `logEvent`.

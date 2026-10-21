@@ -2,6 +2,8 @@
 
 Цей розділ визначає межі між лендінгом, продуктовим host і Smartico. Він застосовується до промо з місією, named Client Action або обома механізмами. Конкретні ID, бонуси й дати належать конфігурації середовища, а не спільній бібліотеці.
 
+Для сучасного API, різних типів markers, delivery limits і точного investigation почати з [Smartico knowledge base](../smartico-knowledge/README.md). Повторювані рішення з наступних інтеграцій — [promo patterns](21-promo-patterns.md); bugfix та modal cleanup — [incident catalog](22-incidents-and-popup-cleanup.md).
+
 Суміжні розділи: [контракти iframe](02-iframe-and-contracts.md), [event actions](03-event-actions.md), [стани й час](04-state-and-time.md), [popup templates](06-smartico-popup-templates.md), [native WebView](07-native-webview.md).
 
 ## 1. Вибрати механіку перед версткою
@@ -17,6 +19,8 @@
 **Client Action, `event_action` і popup click — різні рівні.** Додавання analytics event або переходу не нараховує бонус і не підтверджує вступ у Journey. Вибір entry trigger описати через одну з явних механік у [mission runbook](05a-smartico-mission-runbook.md), [Journey runbook](05b-smartico-journey-runbook.md) або [Client Actions](05c-smartico-client-actions.md).
 
 Лендінг повідомляє намір користувача, відображає підтверджені дані й керує очікуванням. Smartico/backend визначає eligibility, кількість спроб, результат, caps, grant та повторний вхід. Не переносити ці рішення в випадковий `Math.random()`, `localStorage` або клієнтський таймер.
+
+Перед irreversible opt-in визначити prerequisites і точку витрачання спроби. Missing prerequisite, яка за правилами не має витрачати участь, веде в окрему інформаційну підказку без opt-in/grant. Сервер повторно перевіряє умови після preflight. Окремий informational Journey не суперечить одному core Journey для outcome branches однієї спроби.
 
 ## 2. Discovery: що і звідки беремо
 

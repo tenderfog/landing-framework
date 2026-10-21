@@ -1,6 +1,10 @@
 # Smartico popup: reusable template та creatives
 
-Popup створюється **в Smartico**, не як окрема модалка landing, яка симулює Journey. Локальний preview потрібний для розробки; результат для BO — Configuration JSON, Body HTML/CSS і params/asset values. JS додається лише за потреби та перевіреною підтримкою runtime.
+CRM popup створюється **в Smartico**, не як окрема модалка landing, яка симулює Journey. Станом на перевірку 21.10.2026 [офіційний guide](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/pop-up) рекомендує **Vibe Studio** для нових popup і позначає templates як legacy; наявні шаблонні popup продовжують працювати. Спочатку перевірити доступний mode в потрібному label. Нижче — докладний runbook **legacy Configuration/Body**, потрібний для підтримки, очищення й виправлення template-based інтеграцій. Це не універсальний default нового vendor authoring.
+
+Для legacy результат для BO — Configuration JSON, Body HTML/CSS і params/asset values. JS додається лише за потреби та перевіреною підтримкою runtime. Для Vibe Studio зберігається actual popup design/resource і точні link→Flow exits; не переносити його branches механічно на старі `dp:ok/cancel` connectors. [Актуальна KB та джерела](../smartico-knowledge/README.md). Звичайна локальна інформаційна modal, яка не керує CRM engagement/grant, може лишатися у frontend — [розділення поверхонь](19-surfaces-and-workflows.md).
+
+Історія багів, reconfiguration й безпечне видалення зайвого коду: [incident catalog](22-incidents-and-popup-cleanup.md). Перевіряємо actual published Body + Configuration defaults + creative overrides, а не лише локальний файл.
 
 Спочатку встановити [action/branch contract](05b-smartico-journey-runbook.md). Рендерер не визначає виграш і не видає бонус. Native renderer доставляє той самий creative через [wrapper handshake](07-native-webview.md).
 

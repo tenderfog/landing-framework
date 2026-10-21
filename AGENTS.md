@@ -1,6 +1,6 @@
 # Інструкції агенту: промо-лендінги
 
-Ця папка — переносний playbook для проєктування, реалізації та перевірки промо у Web iframe, Swift WKWebView і React Native Android WebView. Інструкції та описи українською; назви файлів, ключі, internal names Smartico, action names і analytics IDs — латиницею. Видимі тексти перекладаються за локаллю.
+Ця папка — переносний framework для самостійного проєктування, реалізації, дослідження й перевірки промо для SlotCity, CatBet та нових продуктів: landing, продуктовий widget і Smartico popup у Web iframe, Swift WKWebView та React Native Android WebView. Інструкції та описи українською; назви файлів, ключі, internal names Smartico, action names і analytics IDs — латиницею. Видимі тексти перекладаються за локаллю.
 
 ## Як почати
 
@@ -14,6 +14,11 @@
 | Задача | Основні файли |
 |---|---|
 | Framework, архітектура, build і client lifecycle | [00 — Vue 3 + Nuxt 4](docs/00-technical-stack.md) |
+| Landing чи widget, спільний state, окремий delivery | [19 — процеси поверхонь](docs/19-surfaces-and-workflows.md) |
+| SlotCity/CatBet/новий продукт, capability discovery | [20 — product profiles та investigation](docs/20-product-profiles-and-investigation.md) |
+| Повторювані механіки, prerequisites, асинхронність | [21 — reusable patterns](docs/21-promo-patterns.md) |
+| Будь-яке питання про Smartico, актуальні джерела | [Smartico knowledge base](smartico-knowledge/README.md) |
+| Виправлення багів, модалки, очищення runtime | [22 — каталог інцидентів](docs/22-incidents-and-popup-cleanup.md) |
 | Канали, auth, iframe | [02](docs/02-iframe-and-contracts.md), [17](docs/17-security.md) |
 | CTA, ігри, категорії, бонуси | [03](docs/03-event-actions.md) |
 | Стани, верифікація, daily reset | [04](docs/04-state-and-time.md) |
@@ -42,7 +47,10 @@
 - Публічна методологія містить умовні domains та IDs. Внутрішні джерела, entity map, tenant/environment конфігурацію й дані конкретної кампанії зберігай у приватному project kit; вони не потрібні для публічних прикладів.
 - Web-перевірка не є доказом роботи App. Stage, local mocks і real-device результати позначай окремо.
 - Popup перевіряється фактичним template engine Smartico. CSS `%}` і `{%` у literal можуть ламати компіляцію. Fullscreen визначає host, а не CSS усередині iframe.
-- Для popup обрати дизайн-сценарій: готовий Figma або самостійно за brief. Обидва завершуються Smartico Configuration/Body/creative values, не окремою frontend заміною CRM popup. [Контракт](smartico-popups/implementation-contract.md).
+- Для CRM popup спершу перевірити authoring mode: актуальні vendor docs рекомендують Vibe Studio для нових popup, template Configuration/Body — legacy шлях для підтриманих інтеграцій. Наявні templates продовжують працювати; автоматична міграція не потрібна. Дизайн може бути за Figma або brief. Локальна інформаційна frontend modal без CRM state/grant може лишатися локальною. [Контракт](smartico-popups/implementation-contract.md).
+- До irreversible mission opt-in перевірити доступні prerequisites; інформаційна підказка не повинна витратити спробу. Сервер повторно перевіряє eligibility.
+- Communication CAPs, popup queue/retention, Journey entry limits, attempt caps та grant idempotency — різні механізми. Marker writes не вважати atomic lock.
+- Analytics delivery mode береться з product profile: DOM markers/GTM або programmatic events. Не додавати обидва й не переносити запропоновані auth/state params до фінального контракту без підтвердження.
 
 ## Завершення
 

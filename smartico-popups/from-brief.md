@@ -1,5 +1,7 @@
 # Smartico popup з брифу без готового макета
 
+Область технічного output нижче — **legacy Configuration/Body**. До нового popup перевірити [Vibe/legacy routing](README.md). У Vibe передаємо збережений vendor resource і actual link exits, зберігаючи ці design/action/QA principles; автоматично мігрувати наявний template не потрібно.
+
 Цей процес потрібний, коли є механіка акції, бренд і контент, але немає погодженого Figma-компонента. Ми самостійно проєктуємо вигляд, перевіряємо його на різних екранах і реалізуємо **Smartico Configuration + Body + creative values**. Локальний прототип допомагає прийняти рішення; він не стає окремою frontend-модалкою замість Smartico popup.
 
 Технічна основа — [спільний implementation contract](implementation-contract.md) та [reusable templates](../docs/06-smartico-popup-templates.md). Для App потрібний [native WebView contract](../docs/07-native-webview.md), для подій — [analytics contract](../docs/12-analytics.md). Цей документ додає процес проєктування, а не дублює engine, socket чи grant implementation. Почни із [popup brief](templates/popup-brief.md); [повний Configuration/Body/values приклад і compiler checker](examples/README.md) використовуються після дизайн-рішення.

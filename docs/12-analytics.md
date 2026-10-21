@@ -4,6 +4,24 @@
 
 Аналітика відповідає на бізнес-питання, а не повторює кожну анімацію. До реалізації погодьте події, власників, канал, consent, знаменники метрик і спосіб перевірки. Використовуйте [шаблон плану](../templates/analytics-plan.md).
 
+## 0. Спочатку вибрати collection contract
+
+У подальшій роботі над дослідженими інтеграціями попередню пропозицію програмних `ga_*` events було замінено **HTML `data-gtm-id` hooks та collector, яким володіє аналітик**. З коду прибрано власні send/dataLayer producers і непогоджені auth/state/timing attributes. Це новіший project contract; програмна модель нижче зберігається як варіант для продуктів, де її окремо підтверджено.
+
+| Mode | Обов'язок UI | Обов'язок analytics/host owner |
+|---|---|---|
+| DOM hooks / GTM | Стабільні погоджені `data-gtm-id` на semantic controls/segments | Actual click/visibility collector, consent, destination mapping і dedupe |
+| Programmatic events | Один approved sender з allow-listed payload | Підтверджений receiver/channel/schema й delivery QA |
+| Native measurement | Погоджений host adapter або existing native collector | Supported handlers, valid SDK event names/types, platform dimensions |
+
+Одна дія не надсилається двома modes. Погоджене DOM marker name може нагадувати `ga_*`, але атрибут сам не викликає `logEvent`. Наявний GTM container не означає, що він автоматично читає arbitrary attributes або cross-origin iframe/popups. Для кожного document/surface потрібний реальний supported collector; parent не читає DOM child напряму.
+
+У DOM mode не переносити `has_auth`, `ui_state`, timings та інші параметри з прикладів нижче без чинного контракту. Платформні зрізи можуть збиратися існуючим host collector без додаткових UI attributes. Перевіряти marker у final DOM після async render/state update; collector має обробляти появу нових segment nodes. Клік disabled/hidden control не є participation; markup має лишатися стабільним до завершення прийнятої взаємодії.
+
+Section/segment show вимірюється за actual embed geometry і погодженим dwell/threshold, якщо він потрібний. QA preview/jump до фінальної сцени не є справжнім проходженням воронки. Для widget додати placement і mount/visibility policy. [Surface workflow](19-surfaces-and-workflows.md).
+
+Розділи зі словником, payload та retry нижче застосовуються **лише за обраного programmatic contract** або як vocabulary для аналітика. Вони не перекривають новіший DOM-only project contract. Звітність Smartico й інтерпретація entries/users/grants — [окремий guide](../smartico-knowledge/05-investigation-and-analytics.md).
+
 ## 1. Що вимірюємо
 
 Базова воронка:
@@ -57,7 +75,7 @@ CTA click
 | Popup impression/click Smartico | Smartico штатний transport | Не дублювати його вручну |
 | Видача бонусу | Bonus/Journey backend | UI не вигадує фінансового результату |
 
-Якщо taxonomy продукту вже існує, використовуйте її. Користувач надав конвенцію продуктового аналітика `ga_*`; саме вона є пріоритетною для emitted events у цьому пакеті. Не надсилайте одночасно старі `landing_view`/`promo_landing_view` та новий GA event «про всяк випадок». Внутрішні business intents на кшталт `cta_click` можуть лишатися у коді adapter, але mapping має віддавати **одне** погоджене ім'я.
+Якщо taxonomy продукту вже існує, використовуйте її. Історична конвенція аналітика `ga_*` нижче задає приклади vocabulary для відповідного contract, не обов'язковий JS producer. Не надсилайте одночасно старі `landing_view`/`promo_landing_view` та новий GA event «про всяк випадок». Внутрішні business intents на кшталт `cta_click` можуть лишатися у коді adapter, але collector/mapping має віддавати **одне** погоджене ім'я.
 
 ## 4. Конвенція аналітика та словник кампанії
 
@@ -228,6 +246,6 @@ function track(event: SafePromoEvent, adapter: ApprovedAnalyticsAdapter | null) 
 ## Джерела та споріднені документи
 
 - База методології: [landing_doc](https://github.com/onlineTeran/landing_doc/), зокрема `GA-ANALYTICS-SPEC.md`, `framework/ANALYTICS.md` і `IFRAME-LANDING-RUNBOOK.md`; версію бази фіксуйте в provenance пакета.
-- Надана користувачем конвенція продуктового аналітика `ga_{module/modal}_{action}_{element/result}` — preferred naming contract; campaign dictionary і incomplete validation pattern потребують окремого погодження.
+- Історична конвенція `ga_{module/modal}_{action}_{element/result}` — vocabulary для підтриманого mode; новіший DOM-only project contract має пріоритет над старим програмним proposal. Campaign dictionary і incomplete validation pattern потребують окремого погодження.
 - [Google Analytics event reference](https://developers.google.com/analytics/devguides/collection/ga4/reference/events) і [collection limits](https://support.google.com/analytics/answer/9267744) — platform schema/limits, не підтвердження нашого measurement channel.
 - [QA](13-qa.md), [приватність](17-security.md), [шаблон плану](../templates/analytics-plan.md).

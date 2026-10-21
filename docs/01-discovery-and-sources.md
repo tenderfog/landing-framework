@@ -26,6 +26,7 @@
 Мітки для технічного твердження:
 
 - **Contract** — підтверджено актуальним owner/API protocol з версією.
+- **Documented** — прочитана поточна vendor capability з URL/revision/date; наявність у docs ще не доводить enabled feature у tenant або реалізацію в продукті.
 - **Observed** — конкретний build/environment/account/device; не узагальнювати без перевірки.
 - **Example** — умовні значення або pseudocode; не копіювати у live без заповнення.
 - **Proposed** — потребує capability/schema та узгодження host/native.

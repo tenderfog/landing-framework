@@ -67,7 +67,7 @@ flowchart TD
 
 ## 4. Спочатку template й creatives, потім Activities
 
-За [popup runbook](06-smartico-popup-templates.md) зібрати reusable template і потрібні visual assets. Не створювати окремий template тільки заради іншого title/icon/button count.
+За [popup KB](../smartico-knowledge/04-popups-and-routing.md) спершу вибрати actual authoring mode. Для підтриманого legacy mode за [popup runbook](06-smartico-popup-templates.md) зібрати reusable template й visual assets; не створювати окремий template лише заради title/icon/button count. Для Vibe зберегти actual popup resource і перевірити link exits до прив'язки activity.
 
 У Flow Builder додати потрібні popup activities з **точними asset IDs**. Один loss asset може використовуватися кількома гілками, якщо content/actions однакові. Кожен occurrence залишається окремим engagement; router/dedup не спирається лише на resource ID.
 

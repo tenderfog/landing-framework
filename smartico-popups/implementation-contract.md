@@ -1,6 +1,6 @@
 # Спільний контракт реалізації Smartico Popup
 
-Цей документ застосовується після [Figma-сценарію](from-figma.md) або [самостійного проєктування](from-brief.md). Він фіксує, що саме зробити, перевірити й передати. Точні API, BO fields та syntax взяти з вашого runtime і [технічного runbook](../docs/06-smartico-popup-templates.md).
+Цей документ застосовується після [Figma-сценарію](from-figma.md) або [самостійного проєктування](from-brief.md). Він фіксує legacy template deliverables. Спершу перевірити authoring mode: [нові popup рекомендовано робити через Vibe Studio](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/pop-up); наявні Configuration/Body підтримуються. Точні API, BO fields та syntax взяти з вашого runtime і [технічного runbook](../docs/06-smartico-popup-templates.md). Для Vibe output — saved design/resource, content variations і actual link exits; не застосовувати legacy compiler contract до іншого engine.
 
 ## 1. Паспорт компонента
 

@@ -6,6 +6,9 @@
 |---|---|
 | Campaign slug / public path | |
 | Product / brand / country | |
+| Surface: landing / product widget / CRM popup / combination | |
+| Product profile version / capabilities / existing approved adapters | |
+| Widget role/placement brief, якщо входить у scope | |
 | Product owner / CRM / frontend / native / QA / release | |
 | Product request / approved rules / version | |
 | Figma file + nodes desktop/mobile/states/locales | |
@@ -25,10 +28,13 @@
 | Start / exclusive end / IANA timezone | |
 | QA range та відмінності від production | |
 | Eligibility / verification truth owner | |
+| Prerequisites / qualifying source event / projection freshness | |
+| Irreversible attempt-consumption operation / behavior before prerequisite | |
 | Trigger: mission або Client Action | |
 | Повторна участь / reset / per-user caps | |
 | Result/grant owner / rewards IDs | |
 | Analytics status: planned/approved/live | |
+| Analytics collection: DOM hooks / programmatic / native + current owner contract | |
 | Stage/Production authorized scope із сесії | |
 
 Описати одну user story для guest, unverified, eligible/available, exhausted, error та ended. Вказати, що показує UI та який server факт дозволяє participation. Перелік невідомих: питання → owner → потрібний доказ → незалежна робота, яка може тривати.

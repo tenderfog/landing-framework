@@ -61,6 +61,8 @@ _smartico.action('campaign_summer_entry', {
 
 ### Iframe, коли sender належить host
 
+**Перевірити побічні ефекти transport.** У дослідженій інтеграції широкий product `openSmartico` route захоплював body scroll lock і очікував callback закриття gamification widget, якого plain Client Action popup не давав. Застосований action-only sender через вже погоджений identified SDK/provider усунув цей шлях блокування. Це не дозвіл додати другий SDK/session або звертатися до cross-origin parent. Коли host-owned route є єдиним supported sender, перевірити його modal/scroll lifecycle й передати missing capability host owner. Для звичайної навігації правило event_action лишається чинним.
+
 У [публічному pinned product registry](https://github.com/onlineTeran/landing_doc/blob/14f93e5c1f16ff349a52f10ec1c5bd1c2db47030/assets/EVENT-ACTIONS.md) є продуктова Smartico дія. Це приклад для host, який окремо підтвердив підтримку цього route та його downstream semantics:
 
 ```js
@@ -71,7 +73,7 @@ IframeBridge.sendMessage(
 );
 ```
 
-Тут host виконує downstream Smartico deep link. Не додавати поряд `_smartico.action(...)`: це два events. Payload support через цей рядковий маршрут перевіряється окремо; не додавати довільні JSON/query поля й не припускати, що вони дійдуть незмінними. [Event actions](03-event-actions.md).
+Тут host виконує downstream Smartico deep link. Це **умовна можливість підтвердженого route**, не рекомендований default для будь-якого Client Action. Не додавати поряд `_smartico.action(...)`: це два events. Payload support через цей рядковий маршрут перевіряється окремо; не додавати довільні JSON/query поля й не припускати, що вони дійдуть незмінними. [Event actions](03-event-actions.md), [incident catalog](22-incidents-and-popup-cleanup.md).
 
 ### Native App
 

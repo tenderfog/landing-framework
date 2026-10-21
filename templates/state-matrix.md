@@ -8,6 +8,8 @@
 | verification loading | identity valid, eligibility unknown | hidden | none | | loading | |
 | unverified | confirmed profile predicate false | Верифікуватись | verif action, no activation | | | |
 | verified/state loading | eligibility true, attempt unknown | hidden | none | | loading | |
+| prerequisite pending/unknown | identity valid, qualifying source/projection not fresh | locked | read refresh, no attempt consumption | | updating | |
+| prerequisite missing | confirmed condition false | next step | info/local or CRM prompt, no mission opt-in | | | |
 | available | fresh authoritative state | | one opt-in OR Client Action | | | |
 | pending | activation in-flight | locked | no duplicate | | visual loader duration | |
 | uncertain | timeout/no current truth | locked | retry read only | | syncing | |

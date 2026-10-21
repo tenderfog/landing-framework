@@ -34,6 +34,7 @@
 |---|---|---|---|---|
 | Auth/token/context | | | | |
 | Locale/theme | | | | |
+| Prerequisite source → CRM projection → public state/freshness | | | | |
 | Trusted host platform/surface/device для analytics | | | | |
 | Verification/eligibility read | | | | |
 | Mission list/read/updates/opt-in | | | | |
@@ -41,9 +42,11 @@
 | Current-cycle read/caps у Client Action mode | | | | |
 | Product event actions | | | | |
 | Smartico popup presentation/controls | | | | |
+| Popup suspension/queue/caps/delivery timeout + acknowledgment boundaries | | | | |
 | dp:go → event_action routing | | | | |
 | Analytics + consent | | | | |
 | Host viewport/visibility | | | | |
+| Widget slot/mount/unmount/height/placement ownership | | | | |
 
 У клітинці ставити supported із доказом, unsupported або proposed. Proposed API не можна викликати як реалізований.
 
@@ -60,6 +63,8 @@ Canonical bridge version/hash: ___. Scroll owner: ___. Height root/settled updat
 ## Participation contract
 
 Trigger mode: ___. Mission/task або Client Action name/schema: ___. Schedule + IANA timezone: ___. Server-side eligibility/caps/idempotency: ___. Current state endpoint/fields/timestamp units: ___. Popup delivery owner: ___. Close/claim/risk/passive dismissal semantics: ___. Grant failure handling і navigation після confirmed grant: ___.
+
+Prerequisite/preflight before attempt consumption: ___. Source event/status/currency/window/units: ___. Public/server condition mapping і revoke policy: ___. Realtime vs historical backfill scope: ___. Informational flow separate from core participation: ___. Action-only sender / navigation scroll-lock side effects checked: ___. Actual published popup authoring mode/Body/defaults/creative overrides: ___. Global communication settings vs per-activity exceptions vs bonus caps: ___.
 
 ## Acceptance
 

@@ -1,6 +1,8 @@
 # Реалізація модалок Smartico
 
-Окремий пакет для створення **Smartico Popup Template**, його creatives та перевірки показу у Web, Swift WKWebView і React Native Android WebView. В обох сценаріях результат завантажується у Smartico. Самостійна реалізація означає проєктування за брифом без готового макета; вона також завершується Smartico template.
+Окремий пакет для підтримки й створення **legacy Smartico Popup Template**, його creatives та перевірки показу у Web, Swift WKWebView і React Native Android WebView. Спочатку обрати actual authoring mode: станом на 21.10.2026 [Smartico рекомендує Vibe Studio для нових popup](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/pop-up), а наявні templates продовжують працювати. Доступність перевірити у вашому label; автоматично мігрувати чинні creatives не потрібно. [Smartico KB](../smartico-knowledge/README.md) описує вибір mode й актуальні джерела.
+
+Два процеси нижче докладно описують Configuration/Body шлях. Для Vibe Studio використати їхні design/action/QA principles, але передати actual saved popup resource й link→Flow exits замість вигаданого legacy export. Для виправлення й очищення наявних модалок прочитати [каталог інцидентів](../docs/22-incidents-and-popup-cleanup.md).
 
 ## Обрати сценарій
 

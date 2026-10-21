@@ -1,5 +1,7 @@
 # Smartico popup за готовим дизайном Figma
 
+Область цього runbook — **legacy Configuration/Body**, якщо саме цей mode підтверджено. Для нового popup спершу перевірити [Vibe/legacy routing](README.md); design/action/QA principles нижче лишаються корисними в обох modes, але output/engine відрізняються.
+
 Цей runbook перетворює погоджений Figma-дизайн на **template у Smartico та creatives на його основі**. Результат — Configuration JSON, Body HTML/CSS, локалізовані значення creatives, delivery assets і QA evidence. Локальна сторінка потрібна для preview і перевірки compiler; вона не стає окремою frontend-модалкою, яка підміняє CRM flow.
 
 Перед реалізацією прочитати [спільний implementation contract](implementation-contract.md), [технічний runbook шаблонів](../docs/06-smartico-popup-templates.md), [native wrapper](../docs/07-native-webview.md), [Figma/assets](../docs/08-figma-and-assets.md). Тут описано послідовність роботи з дизайном; спільні правила не перевизначаються. Для початку скопіювати [popup brief](templates/popup-brief.md); повний узгоджений [Configuration/Body/values комплект і runnable checker](examples/README.md) доповнює структурний фрагмент нижче.

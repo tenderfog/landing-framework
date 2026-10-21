@@ -12,6 +12,9 @@
 | Creative variants | | | | | |
 | Bonus/reward resources | | | | | |
 | Audience/segment | | | | | |
+| Prerequisite automation rule / source event | | | | | |
+| Public marker/property / server-side eligibility condition | | | | | |
+| Informational Journey/action, якщо потрібні окремо | | | | | |
 
 Описи українською, display content — approved locale. Зафіксувати existing entity reuse або new entity creation, щоб не створювати duplicates.
 
@@ -22,6 +25,10 @@ Mode: ___. Exact event/type/entityId або Client Action name/case: ___. Event 
 Grant-day basis (attempt cycle або фактичний local issue day): ___. Per-attempt idempotency: ___. Якщо потрібний окремий daily grant cap, його atomic server owner/mechanism: ___. Pending через midnight та failed/retried grant policy: ___.
 
 ## Branch contract
+
+Prerequisite definition (one event/sum, minimum, currency, approved status, window/timezone, lifetime/revoke): ___. Irreversible consumption point: ___. UI preflight/server recheck: ___. Realtime cutover/historical backfill scope: ___. State projection/freshness semantics: ___.
+
+Popup authoring mode/current capability source: ___. Active Body/design revision + defaults/creative overrides: ___. Communication global delays/CAPs/queue/retention/suppression: ___. Per-activity exceptions and shared-label impact: ___. Pending/delivery failure/retry policy: ___. These are separate from bonus caps and attempt limits.
 
 ```text
 Trigger -> Eligibility/caps -> Result branch -> Creative -> response/control

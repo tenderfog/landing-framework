@@ -2,7 +2,7 @@
 
 Вимога власника продукту від **07.10.2026**: промо-лендінги за цим playbook реалізуються на **Vue 3 та Nuxt 4**. Це стандарт реалізації, а не один із варіантів. Nuxt 3, окремий React/Vite application або самостійний HTML/JS лендінг не є альтернативним стеком для нової акції.
 
-Вимога описує вебконтент лендінгу. Swift `WKWebView` та React Native Android залишаються його нативними hosts. Модалки Smartico залишаються Configuration JSON + Body HTML/CSS у фактичному vendor template engine; їх не замінюємо Nuxt-сторінками. Старі case studies і framework-independent helpers — джерела досвіду та логіки, не стартовий application іншого стеку. Зміна документації сама по собі не мігрує вже опубліковані акції.
+Вимога описує вебконтент продуктового лендінгу. Swift `WKWebView` та React Native Android залишаються його нативними hosts. Smartico popup має власний vendor runtime: Vibe Studio для нових popup за актуальними docs або Configuration JSON + Body HTML/CSS для підтримуваних legacy templates; їх не замінюємо Nuxt-сторінками. Віджети всередині наявного frontend використовують його contract/stack; окремий entry погоджується за [surface workflow](19-surfaces-and-workflows.md). Старі case studies і framework-independent helpers — джерела досвіду та логіки, не стартовий application іншого стеку. Зміна документації сама по собі не мігрує вже опубліковані акції.
 
 ## 1. Склад і правила вибору залежностей
 

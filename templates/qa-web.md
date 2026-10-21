@@ -34,8 +34,12 @@
 | W09 | Responsive / keyboard / locales / FAQ | No overflow; focus/ARIA; grow і shrink iframe; approved copy | TODO |
 | W10 | Video cold/warm cache, blocked autoplay, audio | Poster до actual playback і зникає; honest manual fallback | TODO |
 | W11 | Carousel/lazy images/motion/WebGL | Pause interaction/background; near-view load; reduced motion; fallback failures | TODO |
-| W12 | Analytics, якщо впроваджено | Exact `ga_*` dictionary/CTA IDs, approved delivery/consent/dedupe, no token/PII; successful не вигаданий із click/show; інакше NOT_TESTED | TODO |
+| W12 | Analytics, якщо впроваджено | Approved DOM hooks/GTM або programmatic dictionary, actual collector/receiver, consent/dedupe, no token/PII; successful не вигаданий із click/show; інакше NOT_TESTED | TODO |
 | W13 | Published build/cache/parent overlays | Marker збігається, canonical URL/query живі, CTA не перекриті | TODO |
+| W14 | Prerequisite before opt-in, delayed projection | Missing prerequisite не витрачає спробу; approved event не потребує повторного депозиту; bounded state refresh | TODO |
+| W15 | Cashier→return→repeat clicks, queue/delays/CAPs | Один intent/sender, узгоджений pending lifecycle; реальна кількість delivery, no shared-cap bypass | TODO |
+| W16 | Popup cleanup/reconfiguration | Actual saved Body/defaults/creative overrides; compiler/first tap/actions; blocked resources; clean release variant | TODO |
+| W17 | Widget/scene integration, якщо застосовується | Real slot/grow-shrink/remount; concurrent placements; state refresh зберігає позицію; gesture і FAQ handoff | TODO |
 
 Потрібна матриця browser/viewport: `<actual audience +320px smoke, desktop, landscape, iOS Safari, Android Chrome>`. Перевірка у resize desktop не є actual mobile device evidence.
 
