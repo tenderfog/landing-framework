@@ -63,23 +63,17 @@ JS marker доступний frontend і може змінюватись чер�
 
 Vibe Widgets — окремий vendor продукт для персоналізованих блоків logged-in гравців, з успадкуванням поточної host session. Це не обмеження для вашого власного promo widget, який може мати guest state. [Widgets](https://help.smartico.ai/welcome/products/vibe-studio/widgets).
 
-## Мінімальний integration passport
+## Де зафіксувати конкретну інтеграцію
 
-Заповни приватно перед кодом:
+Використай [product profile](../templates/product-profile.md) та [integration contract](../templates/integration-contract.md): вони містять environment/session/schema/capability поля й не дублюються окремим паспортом у KB. Stage/Prod використовують окремі environment keys за [Front-end integration](https://help.smartico.ai/welcome/technical-guides/front-end-integration); origin не береться з неперевіреного query string.
 
-- product, ENV, label/brand, дозволені origins та SDK/runtime version;
-- session owner, спосіб readiness/identify, logout/account-switch lifecycle;
-- source кожного UI-поля: KYC, eligibility, mission, cycle, remaining attempts, popup pending;
-- exact sender для opt-in/Client Action/navigation; один owner для кожної дії;
-- список доступних host/native capabilities, request/response correlation, timeout та recovery;
-- state subscriptions, cache/freshness і спосіб безпечного teardown;
-- popup authoring mode, renderer, communication policy та bonus integration owner.
-
-Відмінності Stage/Prod — окремі environment values з перевіреної конфігурації. [Front-end integration](https://help.smartico.ai/welcome/technical-guides/front-end-integration) прямо вимагає окремі environment keys. Не перемикай API origin за неперевіреним query string.
+Adapter нормалізує підтверджені raw схеми один раз. Web `id` не слід автоматично читати з native `ach_id`, а missing `isLocked` — перетворювати на false через `Boolean(undefined)`. Власний DTO на кшталт `nextResetAt` має відоме джерело/units; його назва не оголошується vendor API. Внутрішній adapter interface — реалізаційне рішення продукту, не встановлена Smartico RPC capability.
 
 ## Lifecycle, який має пережити реальний продукт
 
-Ініціалізація бібліотеки, завантаження label config і успішна identify — різні моменти. `identify` callback може повідомляти помилку; перевіряй її до user-scoped дій. `props_change` після початкового набору може передавати часткові зміни: відсутнє поле не означає false. Late subscription може пропустити readiness; повторний mount може накопичити handlers. [Callbacks reference](https://github.com/smarticoai/public-api/blob/81f2790f02424f01dadcbe979288f096cdc5d542/docs/Callbacks.md).
+Ініціалізація бібліотеки, завантаження label config і успішна identify — різні моменти. `script.onload` сам по собі не означає готовність user-scoped API. `identify` callback може повідомляти помилку; перевіряй її до user-scoped дій. `props_change` після початкового набору може передавати часткові зміни: відсутнє поле не означає false. Late subscription може пропустити readiness; повторний mount може накопичити handlers. [Callbacks reference](https://github.com/smarticoai/public-api/blob/81f2790f02424f01dadcbe979288f096cdc5d542/docs/Callbacks.md).
+
+Для публічних властивостей початковий `getPublicProps()` і подальший `props_change` мають різну повноту. Для погодженого `core_public_tags`: missing initial field лишається unknown; відсутнє поле в partial patch не стирає попередній стан; валідний `[]` означає відсутність marker; malformed тип/items дає controlled error. Marker порівнюється exact key/value за contract, не substring/case-insensitive guess. Це конкретний web contract; native parity перевіряється окремо.
 
 Практичний контракт: service зберігає нормалізований стан; компоненти підписуються на нього; account switch інвалідує попередні запити; cleanup прибирає тільки власні listeners. Не викликай глобальне очищення всіх SDK handlers із widget unmount. `init/online/logout` та підтриманий readiness gate звіряються з [поточною object reference](https://github.com/smarticoai/public-api/blob/81f2790f02424f01dadcbe979288f096cdc5d542/docs/SmarticoObject.md) і вашим integration code.
 

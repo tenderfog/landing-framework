@@ -21,14 +21,19 @@ Frontend може показувати CRM marker виконаної prerequisit
 
 Відділи **цільову когорту до акції** від **права після виконання умови**. Наприклад, аудиторія «давно не було депозиту» може перестати відповідати сегменту саме після необхідного депозиту. Якщо бізнес вимагає зберегти участь цієї когорти, потрібен явно обраний snapshot/locked audience або інший підтверджений cohort contract. У [Common Cases Segments](https://help.smartico.ai/welcome/products/crm-automation/segmentation/common-cases-segments) описані збережені списки та rebuild: live `Real-time Users` preview і `Segment Users` після rebuild не однакові. Такий segment корисний для targeting/reconciliation, але його refresh не є миттєвим atomic guard.
 
-## Налаштування місії: порядок, що зменшує неоднозначність
+## Типи місій та видимість
 
-1. Вибери тип місії: one-shot, locked, recurring за розкладом чи recurring upon completion. Одна назва «повторювана» не визначає її часове правило.
-2. Налаштуй visibility/audience, public content, opt-in requirement та загальний availability window.
-3. Опиши task: exact event, conditions, count/sum/unique attribute, частоту зарахування та progress weight.
-4. Визнач один owner reward: mission completion чи Journey. Якщо обидва містять grant, треба довести, що вони видають різні затверджені винагороди.
-5. Зафіксуй recurrence/timezone, перший run, claim window та окремий UX для not started, not visible, available, in progress, completed, claimable, expired, error.
-6. Збережи Draft, перечитай, перевір на тестовій ролі й лише потім активуй в межах наданого scope. Публічний guide описує незворотні status transitions: не використовуй Archive як тимчасову паузу без перевірки наслідків. [Mission setup](https://help.smartico.ai/welcome/products/gamification-basics/missions/how-to-set-up-a-mission).
+| Бізнес-модель | Тип / відмінність |
+|---|---|
+| Нова спроба всім за календарним розкладом | Scheduled recurring mission |
+| Новий цикл після completion | Recurring upon completion, не спільний midnight reset |
+| Спершу unlock condition | Locked mission із перевіреною unlock task |
+| Один раз за кампанію | Неповторювана mission з відповідними dates/caps |
+| Призначення конкретним користувачам через flow | Featured/assigned, якщо відповідає business contract |
+
+Segment може приховати mission; locked mission може бути видимою, але недоступною. Приховування task list/custom-section placement не змінює eligibility чи completion. Reward має одного owner: mission/task або Journey; дві видачі потребують окремої затвердженої механіки. Status transitions можуть бути незворотними — Archive не слід вважати паузою. [Mission setup](https://help.smartico.ai/welcome/products/gamification-basics/missions/how-to-set-up-a-mission), [Recurring upon Completion](https://help.smartico.ai/welcome/products/gamification-basics/missions/recurring-upon-completion-missions).
+
+BO procedure, task filters, next-runs readback та activation QA — [Mission runbook](../docs/05a-smartico-mission-runbook.md). UI states і timer implementation — [стани й час](../docs/04-state-and-time.md).
 
 ## Calendar recurrence не дорівнює cooldown
 
@@ -39,6 +44,8 @@ Frontend може показувати CRM marker виконаної prerequisit
 `next_recurrence_date_ts` описане у перевіреній поточній API reference для відповідних mission types, але наявність та units треба підтвердити у підтриманому runtime. Не вимагай це поле від старого adapter або об'єкта, де воно не має сенсу після завершення кампанії.
 
 ## Mission state має власні cache та subscription rules
+
+Client calls працюють через `_smartico.api`: `getMissions` для read та `requestMissionOptIn` для opt-in. Exact arguments/response й доступність перевіряються у підтриманому snapshot/runtime; wrapper не вигадує generic ACK або нову mission RPC для canonical bridge.
 
 Перевірений SDK snapshot [`WSAPIMissions`](https://github.com/smarticoai/public-api/blob/81f2790f02424f01dadcbe979288f096cdc5d542/docs/api/classes/WSAPIMissions.md) документує:
 

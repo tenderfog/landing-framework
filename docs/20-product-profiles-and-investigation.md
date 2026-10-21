@@ -43,32 +43,14 @@ Framework дає спільні правила й метод досліджен�
 
 До пошуку fix встановити active source inventory: manifest/build entry → generated output → served revision → actual CRM Body/design/resource. У repo можуть лишатися старий `src/`, prototype і setup notes поряд із новим `app/`; знайдений старий transport не доводить, що саме він виконується зараз. Виправлення неактивного файла дає хибне відчуття прогресу.
 
-```mermaid
-flowchart LR
-  A[Product event accepted] --> B[Smartico source event]
-  B --> C[Property / mission projection]
-  C --> D[Fresh client snapshot]
-  D --> E[CTA intent / opt-in]
-  E --> F[Journey entry / branch]
-  F --> G[Popup delivery / render / control]
-  G --> H[Grant result]
-  H --> I[Product navigation / analytics]
-```
+Знайти **перший доведений розрив**, а не змінювати одночасно UI, Journey та reward rule. Кроки позначаються confirmed / contradicted / not observed / N/A; відсутній доступ до журналу не доводить відсутність події. Конкретні evidence chains і поля зберігаються один раз:
 
-Це evidence chain, не обов'язкова послідовність кожної акції. Informational popup не має grant, navigation teaser не має mission. Для обраного flow заповнюємо лише наявні кроки.
-
-| Питання | Доказ | Типова помилка інтерпретації |
-|---|---|---|
-| Чи відбулася вихідна операція? | Authoritative product/backend event з часом/status/units | Відкриття каси прийняли за успішний депозит |
-| Чи отримав її Smartico? | Профіль/event history у правильному label, sanitized event type | Відсутність marker прийняли за відсутність source event |
-| Чи застосувалось правило? | Active trigger/filter, match branch, property/mission value | Property, segmentation і mission progress вважали одним станом |
-| Що реально читає UI? | Sanitized response shape, identity epoch, freshness, actual build/config | BO уже оновився, а SDK/iframe ще показує старий snapshot |
-| Чи прийнята участь? | Opt-in response + current cycle + Journey history | Click/loader прийняли за accepted entry |
-| Чи доставлений і видимий popup? | Activity status, queue/suppression, rendered root, active session | Journey Then або Impression оголосили доказом усіх наступних кроків |
-| Чи виконано choice/grant? | Connector event, pending context, bonus transaction/status | Перехід на grant node оголосили фактичним нарахуванням |
-| Чи коректний звіт? | Population, event unit, dates, attribution/conversion rules | Entries назвали unique users, deposits — incremental revenue |
-
-Кожний крок може бути `confirmed / contradicted / not observed / not applicable`. Відсутній доступ до журналу не доводить, що подія не відбулася. Після першого встановленого розриву перевірити його boundary; не змінювати одночасно frontend, Journey і reward rule без можливості визначити результат.
+| Сфера | Канонічний маршрут |
+|---|---|
+| Smartico events, state, popup, bonus і reporting | [Investigation KB](../smartico-knowledge/05-investigation-and-analytics.md) |
+| Відомі механізми багів і proof limits | [Incident catalog](22-incidents-and-popup-cleanup.md) |
+| Швидкий пошук за видимим симптомом | [Troubleshooting index](15-troubleshooting.md) |
+| Приватні очікування/спостереження/гіпотези конкретного випадку | [Investigation record](../templates/investigation-record.md) |
 
 ## 5. Робочий цикл перевірки гіпотези
 
@@ -87,6 +69,4 @@ flowchart LR
 
 ## 7. Як поповнювати базу знань
 
-Повторюваний висновок спочатку записати приватно як source/evidence; у shared framework перенести узагальнене правило, межі та спосіб перевірки. Product-specific constants лишаються у profile/kit. Оновити related docs/templates/QA разом, перевірити офіційні джерела, зазначити дату. Не вважати нову версію документації доказом того, що feature вже доступна в tenant або встановлена у host.
-
-При зміні vendor workflow зберегти migration distinction: що підходить новим об'єктам, що працює історично, що треба перевірити до перенесення. Наприклад, рекомендація нового popup authoring не є наказом переписати робочі templates. [Maintenance](18-maintenance.md), [джерела](../SOURCES.md).
+Новий висновок спочатку має приватний source/evidence, потім одну канонічну shared-інструкцію з межами застосування. Порядок review, ownership і підтримки посилань — [maintenance](18-maintenance.md); походження й актуальність джерел — [SOURCES](../SOURCES.md). Vendor documentation не доводить tenant availability, а новий authoring mode не мігрує чинні об'єкти автоматично.

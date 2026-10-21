@@ -25,7 +25,15 @@
 | Marker write або один two-tab test доводить один grant | Atomic cap/issuance idempotency/concurrent proof — окремі речі |
 | Saved settings або local compiler PASS закриває production bug | BO, browser, physical device й original incident cause мають окремі evidence levels |
 
-### Що не змінюється автоматично
+### Консолідація перед публікацією
+
+- Переписано наявні Smartico chapters разом із новою KB: concepts/API мають одного власника, BO runbooks містять процедури й посилання.
+- Figma/brief popup workflows більше не містять дубльованих partial templates: технічний контракт у `06`, єдиний runnable приклад — у `smartico-popups/examples/`.
+- Старий великий programmatic analytics proposal замінено одним mode-aware guide; analytics plan містить поля проєкту без другої копії tutorial/payload.
+- `15` перетворено на symptom index, `22` зберігає детальні механізми інцидентів; дубльоване `case-studies/daily-promo.md` видалено й inbound links оновлено.
+- Product brief посилається на єдині technical values в integration contract, а patterns — на canonical API/reset/cap guides. Maintenance визначає ownership для наступних змін.
+
+### Межі оновлення
 
 Новий framework не переписує опубліковані промо, не міняє live Smartico settings і не встановлює нові native handlers. Vue3/Nuxt4 лишається стандартом продуктового лендінгу. Tenant capabilities й private mappings підтверджуються перед reuse.
 

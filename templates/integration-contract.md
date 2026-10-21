@@ -1,8 +1,10 @@
 # Integration contract — конкретний проєкт
 
+Surface/scope: ___. Успадкований [product profile](product-profile.md), revision/date: ___. Заповнювати лише використані capabilities, campaign-specific відмінності й evidence; незмінні profile values давати посиланням, не другою копією. Для stateless-widget-only або popup-only scope landing build/SDK/mission sections без фактичної залежності позначити N/A.
+
 ## Landing stack та delivery
 
-Обов'язковий [Vue 3 + Nuxt 4](../docs/00-technical-stack.md), Vue SFC із Composition API та `<script setup lang="ts">`. Swift/RN — native hosts; Smartico Configuration/Body — vendor templates. Їхні контракти не замінюють landing stack.
+Обов'язковий [Vue 3 + Nuxt 4](../docs/00-technical-stack.md), Vue SFC із Composition API та `<script setup lang="ts">`. Swift/RN — native hosts; Smartico popup — окремий vendor runtime/authoring contract. Їхні контракти не замінюють landing stack.
 
 | Поле | Фактичне значення / evidence |
 |---|---|
@@ -48,7 +50,7 @@
 | Host viewport/visibility | | | | |
 | Widget slot/mount/unmount/height/placement ownership | | | | |
 
-У клітинці ставити supported із доказом, unsupported або proposed. Proposed API не можна викликати як реалізований.
+У клітинці ставити supported із доказом, unsupported, proposed або unknown. Proposed API не можна викликати як реалізований.
 
 ## Bridge та lifecycle
 
@@ -60,11 +62,11 @@ Canonical bridge version/hash: ___. Scroll owner: ___. Height root/settled updat
 |---|---|---|---|---|---|
 | | | | | | |
 
-## Participation contract
+## Business/CRM references
 
-Trigger mode: ___. Mission/task або Client Action name/schema: ___. Schedule + IANA timezone: ___. Server-side eligibility/caps/idempotency: ___. Current state endpoint/fields/timestamp units: ___. Popup delivery owner: ___. Close/claim/risk/passive dismissal semantics: ___. Grant failure handling і navigation після confirmed grant: ___.
+Approved business rules, dates/timezone/prerequisite: [project brief](project-brief.md), revision ___. CRM entity map, triggers/branches, re-entry/caps, grants і delivery policy: [Smartico blueprint](smartico-blueprint.md), revision ___. UI normalization/CTA states: [state matrix](state-matrix.md), revision ___. Не переписувати значення цих документів у ще одну конфігураційну таблицю.
 
-Prerequisite/preflight before attempt consumption: ___. Source event/status/currency/window/units: ___. Public/server condition mapping і revoke policy: ___. Realtime vs historical backfill scope: ___. Informational flow separate from core participation: ___. Action-only sender / navigation scroll-lock side effects checked: ___. Actual published popup authoring mode/Body/defaults/creative overrides: ___. Global communication settings vs per-activity exceptions vs bonus caps: ___.
+Boundary evidence, яке належить саме інтеграції: exact read fields/units/freshness ___. Source event → public/server projection mapping ___. Consumption/preflight transport ___. Action-only sender та перевірені navigation/scroll-lock side effects ___. Popup authoring/runtime version і доступні delivery/close signals ___.
 
 ## Acceptance
 

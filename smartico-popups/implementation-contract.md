@@ -1,74 +1,53 @@
-# Спільний контракт реалізації Smartico Popup
+# Спільний контракт реалізації Smartico popup
 
-Цей документ застосовується після [Figma-сценарію](from-figma.md) або [самостійного проєктування](from-brief.md). Він фіксує legacy template deliverables. Спершу перевірити authoring mode: [нові popup рекомендовано робити через Vibe Studio](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/pop-up); наявні Configuration/Body підтримуються. Точні API, BO fields та syntax взяти з вашого runtime і [технічного runbook](../docs/06-smartico-popup-templates.md). Для Vibe output — saved design/resource, content variations і actual link exits; не застосовувати legacy compiler contract до іншого engine.
+Це єдина специфікація комплекту передачі й acceptance після [Figma-процесу](from-figma.md) або [проєктування з brief](from-brief.md). Authoring mode і delivery/routing concepts визначає [popup KB](../smartico-knowledge/04-popups-and-routing.md); Configuration/Body mechanics — [legacy runbook](../docs/06-smartico-popup-templates.md). Рендерер не визначає outcome, grant чи caps.
 
-## 1. Паспорт компонента
+## 1. Заповнений паспорт
 
-Записати template ID, якщо він існує, середовище/label/brand, campaign owner, джерело copy, locales, compatible visual states, hosted asset origins і цільові Web/App builds. Не переносити ID, state names, суми бонусів або дати з іншої кампанії.
+Використати **один [popup brief](templates/popup-brief.md)** у campaign kit. Він містить джерела, ENV/label/brand, mode/runtime, entities, surfaces/builds, exact states/copy/actions, outer bounds, locales, params/assets і open dependencies. Не переносити entity IDs, dates або rewards іншої акції.
 
-Визначити зовнішню форму: contained dialog або fullscreen. Для fullscreen власник outer SDK iframe/native WebView підтверджує viewport, safe areas, scrolling, scaling і close/back policy. `position:fixed` усередині Body не збільшить обмежений outer frame. [Native host](../docs/07-native-webview.md).
+Action matrix із brief має покривати всі видимі controls і passive close paths. Вона зв'язує rendered action → connector/route → business effect → required confirmation; не виводити semantics із назви `dp:ok/cancel` чи картинки X. Деталі серверного flow — [Journey runbook](../docs/05b-smartico-journey-runbook.md).
 
-## 2. Перетворити дизайн на параметри
+## 2. Комплект передачі за authoring mode
 
-| Дані | Де визначаються | Як використовуються |
+| Артефакт | Legacy template | Vibe / інший підтверджений vendor mode |
 |---|---|---|
-| Layout, spacing, typography, допустимі skins | Body + за потреби контрольовані Configuration fields | Стабільна структура; довільний CSS від редактора не потрібний |
-| Locale, title, description, accessible labels | Configuration → значення creative | Escaped live text, перевірені переклади |
-| Icon/decor/background URLs | Configuration → значення creative + asset register | External HTTPS ресурси, без великих base64 |
-| Button visibility, label, action; explicit X | Configuration → значення creative | Optional flag та підтриманий href hook |
-| Outcome, bonus amount, cycle, grant, caps | Journey / підтримана серверна механіка | Body лише показує надане значення; не генерує результат |
-| Entrance/motion flag | Configuration або зафіксоване рішення компонента | Reduced motion і дешевий static fallback |
+| Saved resource inventory | Actual template, resources/variations і Journey bindings | Actual saved design/resource, variations і Flow link exits |
+| Render source | `configuration.json` + final `body.html` | Supported saved authoring output/version; legacy export не вигадується |
+| Content/flags | Values per state/locale з типами й precedence | Actual variation/content/link settings відповідного mode |
+| Common design evidence | Figma mapping або visual spec, approved exact copy, responsive previews | Те саме за доступними authoring controls |
+| Asset register | HTTPS sources, dimensions, bytes, cache/CORS/provenance/locales | Те саме, з actual hosted output |
+| Functional evidence | Action matrix, compiler report, real delivery/interaction | Action matrix, actual saved preview/runtime і delivery/interaction |
+| Release record | Source/Body/runtime hashes, target inventory, Web/App results, remaining gaps | Saved version/resource inventory, Web/App results, remaining gaps |
 
-Зберігай ключі однаковими у Configuration, Body, values та tests. Кожне використане поле має бути описане; невикористані поля прибирай. Окремо документуй reserved runtime fields і власні custom names, якщо вони є. Не називай custom `layout` чи `icon_url` універсальними системними полями Smartico.
+Values JSON може бути реєстром для ручного введення: import support перевіряється у вашому BO. Поля прикладу не оголошуються reserved vendor API. Тільки потрібні marketer content/variants робляться редагованими; не потрібно параметризувати кожний CSS pixel.
 
-### Optional і defaults
+## 3. Єдина acceptance matrix
 
-Визначити precedence для кожного поля, а не покладатися на JavaScript truthiness. `checked:false` завжди вимикає блок; рядки `"false"` і `"true"` не є boolean. `optional_default` задає UI default у BO; реально отриманий payload перевіряється окремо. Точний payload optional block з вашого BO зафіксувати в sanitized fixture.
-
-У [навчальному прикладі](examples/README.md): missing optional block вимкнений, лише `{ "checked": true }` увімкнений; missing/blank title отримує нейтральний locale fallback; blank description приховує абзац; blank action приховує кнопку навіть з enabled flag. Для production creative обов'язковий copy не повинен мовчки замінюватися fallback — це перевіряє pre-release validation. Legacy params підтримувати тільки за явним compatibility contract.
-
-## 3. Таблиця actions до верстки
-
-| Елемент | Потрібно записати |
+| Перевірка | Мінімальний доказ / owner |
 |---|---|
-| Primary / secondary | Видимість у state, текст, exact `dp:*`, connector і наступна серверна/навігаційна дія |
-| X | Звичайний dismiss чи explicit business action; доступний label повинен описувати наслідок |
-| Backdrop / Escape / native Back | Хто обробляє, можна чи ні закривати, чи викликається engagement event |
-| CTA до бонусів / гри / категорії | Підтриманий `dp:go` → продуктовий `event_action`, Web та native route coverage |
+| Source і content | Approved nodes/spec + exact state/locale copy, punctuation, qualifiers; player text без internal/QA instructions |
+| Effective data | Body/design ↔ fields/defaults ↔ saved values узгоджені; unique keys, required copy/actions, strict flags і відомий fallback |
+| Legacy compiler | Actual trusted engine/hash і template-ID path; states/locales/minimal/escaped/missing/false/0/1/2-button matrix за [06](../docs/06-smartico-popup-templates.md) |
+| Vibe runtime | Actual supported saved output/preview й link exits; legacy compiler PASS до нього не застосовується |
+| Layout/accessibility | Narrow/intermediate/desktop, low height, safe-area, long locale, 200% text zoom, keyboard/focus/contrast; controls досяжні |
+| 0/1/2 actions | Немає порожнього grid/gap; single action має завершений рядок; без CTA є approved exit/dismiss policy |
+| Assets/fallbacks | Visible nonempty content при cold/warm load, slow/failed image/font і custom-JS failure; actual bytes/CSP/CORS |
+| Interaction | Перший click/tap по всій видимій hit area доходить один раз; mixed clicks, X і passive close за matrix; clean release variant без diagnostic dependency |
+| Flow/bonus/routing | Actual action report → matched branch → authoritative grant/pending/failure → required destination; не screenshot або click inference |
+| Native | Exact Swift WKWebView / RN Android build: handshake + visible content + action handling + Back/close/focus/scroll lifecycle |
+| Save та fresh delivery | Re-open/readback source/version/effective values; correct resource bound to activity; fresh delivered payload відповідає release |
 
-`dp:ok`, `dp:cancel` та custom engagement controls мають ту поведінку, яку налаштували Journey/handler. Самі назви не означають «нарахувати» або «програти». Якщо X і «Забрати» мають однаковий результат, налаштувати explicit accepted click branches до одного grant; не видавати бонус у Body і не вважати пасивне teardown підтвердженням натискання. Локальний first-click guard не забезпечує server idempotency.
+Global delivery settings, queue/caps та повторне відкриття перевіряються за [popup KB](../smartico-knowledge/04-popups-and-routing.md). Діагностичні engine fixtures не тестують network, vendor click hooks, grants, focus management або hardware performance. Зберігати PASS/FAIL/NOT_TESTED окремо за рівнями [QA](../docs/13-qa.md).
 
-Показ, click, grant success і destination navigation — різні події. Не позначати click як successful bonus; не створювати новий analytics transport у Body. Naming, platform/device params, consent і Firebase mapping — у [analytics contract](../docs/12-analytics.md).
+## 4. Зміни та compatibility
 
-## 4. Правила Body
-
-- Живі текстові елементи, escaped interpolation, responsive grid за кількістю видимих buttons. Одна кнопка займає власний завершений рядок; нуль кнопок прибирає actions container.
-- Декор не перекриває pointer targets. Складні skins — CSS або 3/9-slice з живим label; цілі bitmap buttons з текстом не розтягуються.
-- Title/description не обрізаються при довгому перекладі, 200% text zoom або низькому landscape viewport. Dialog може scroll; controls доступні.
-- Тільки scoped CSS; overrides внутрішніх SDK roots допустимі після перевірки конкретного wrapper. Не поширювати case-specific DOM hacks на всі попапи.
-- Літеральні `%}` / `{%` після minify не конфліктують із delimiter. Actual `tmpl('_template', params)` перевіряється після фінального export; custom JS не закриває зовнішній raw-text script element.
-- Ресурси зовнішні та кешовані, icon dimensions відомі. Motion не потрібний для змісту, пауза/cleanup відповідають lifecycle. WebGL додається лише за виправданого ефекту, з fallback і actual GPU/WebView evidence.
-
-Деталі [responsive](../docs/09-responsive-ui.md), [media/motion](../docs/10-media-animation-webgl.md), [performance](../docs/11-performance.md), [security](../docs/17-security.md).
-
-## 5. Матриця перевірки
-
-| Перевірка | Мінімальний доказ |
+| Зміна | Що перечитати й перевірити |
 |---|---|
-| Configuration ↔ Body ↔ values | Повні ключі та strict типи, без дубльованих field names |
-| Actual compiler | Engine source/hash, template-ID path, всі states/locales, minimal та missing optional params |
-| Literal regression / escaping | Контрольований `%}` failure і safe CSS pass, HTML/script-like strings відображаються текстом |
-| 0/1/2 buttons + X | Нуль, primary-only, secondary-only, дві; explicit false/missing; кожна close-комбінація |
-| Assets | Видимий root без blank screen, uncached/cached loading, image/font failure, bytes/CSP/CORS |
-| Desktop / mobile / low height | Дизайн, touch targets, no overflow, live labels, 200% zoom, reduced motion |
-| Actions | Перший click доходить один раз, exact connector, серверний результат, route; mixed double clicks |
-| Real native | WKWebView і RN Android build, handshake + visible rendered content + action handling + native Back |
-| Save / delivery | Re-open saved Body, hash/bytes, creative використовує потрібний template, delivered payload відповідає values |
+| Copy/icon-only | Effective values відповідних variations, assets/locales й affected visual states |
+| Structure/schema/defaults | Body/design, Configuration і **всі** bound resources; старі overrides/minimal params/cached engagements |
+| Action/close behavior | Action matrix, exact Journey connectors, pending context, grant/routing та passive close |
+| Locale | Exact approved copy, resource selection/fallback, fonts/art й long-text QA |
+| Shared asset/template removal | Повний usage inventory і active-consumer lifetime; не видаляти лише через відсутність локального посилання |
 
-Fixture compiler check не тестує actual SDK hooks, grants, browser focus management, asset network, WebView sizing або hardware performance. У release record не об'єднувати ці результати в один «все працює». [QA](../docs/13-qa.md).
-
-## 6. Передача та подальші зміни
-
-Передати Configuration, Body, values per state/locale, asset register, action table, джерело дизайну, QA і delivery inventory. У BO зберегти потрібний template, створити/оновити creatives, перевірити їхні fields, підключити actual IDs до Journey. Publish/deploy виконати в межах авторизації поточної задачі; методологія сама не дозволяє live release.
-
-Copy або icon-only update змінює values відповідного creative; structural update змінює Body й перевіряє всі creatives на цьому template. Новий action потребує перевірки Journey/host router. Новий locale потребує точного copy, fonts/assets і QA, навіть якщо template не змінився. Shared assets не видаляються, поки ними користуються активні campaigns. [Release record](../templates/release-record.md).
+Cleanup/reconfiguration виконується за [єдиним runbook у каталозі інцидентів](../docs/22-incidents-and-popup-cleanup.md), без другої паралельної інструкції тут. Source change, BO save, Journey binding і runtime delivery — окремі результати. Publish виконується лише в чинному authorized scope; цей контракт сам не дає дозволу на live зміни.

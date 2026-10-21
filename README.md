@@ -23,6 +23,19 @@ Framework для самостійного проєктування, реаліз
 
 Папку можна покласти в окремий Git repo або у `methodology/` наявного repo. У root `AGENTS.md` landing repo достатньо додати посилання на цей entrypoint та проєктні виключення. Не підміняй чинний bridge новим кодом із прикладу. Пінуй версію методології на commit/tag, коли її справді додадуть у Git.
 
+## Де шукати правило без читання дублів
+
+| Потрібна інформація | Канонічне місце |
+|---|---|
+| Поняття Smartico, API/update semantics і verified sources | [Knowledge base](smartico-knowledge/README.md) |
+| Покрокове налаштування BO | [Mission](docs/05a-smartico-mission-runbook.md), [Journey](docs/05b-smartico-journey-runbook.md), [Client Action](docs/05c-smartico-client-actions.md) |
+| Legacy popup runtime/compiler | [Технічний runbook](docs/06-smartico-popup-templates.md); дизайн — окремо [Figma/brief](smartico-popups/README.md) |
+| Відома причина багу, фактичний fix і межі доказів | [Incident catalog](docs/22-incidents-and-popup-cleanup.md); швидкий вхід — [symptom index](docs/15-troubleshooting.md) |
+| Рішення й значення нової акції | [Templates](templates/project-brief.md), які посилаються на guides без їх копіювання |
+| Реалізація, яку можна запустити | [Examples](examples/README.md), [popup compiler example](smartico-popups/examples/README.md) |
+
+Одне правило доповнюється в канонічному розділі; суміжні документи дають короткий контекст і посилання. [Порядок підтримки](docs/18-maintenance.md).
+
 ## Карта документації
 
 | Напрямок | Документ |
@@ -76,7 +89,7 @@ Framework для самостійного проєктування, реаліз
 - [Product profile](templates/product-profile.md), [widget brief](templates/widget-brief.md), [investigation record](templates/investigation-record.md).
 - [Campaign config](examples/campaign.config.json), [локалі](examples/locales.json), [navigation helper](examples/event-actions.mjs), [state/time helpers](examples/state-time.mjs), [пояснення runnable прикладів](examples/README.md).
 - [Native Smartico routing](examples/native-smartico-routing.md) — pseudocode, не готовий App patch.
-- [Анонімізований приклад щоденної промо](case-studies/daily-promo.md) — практичні спостереження, а не defaults наступної кампанії.
+- [Promo patterns](docs/21-promo-patterns.md) і [каталог інцидентів](docs/22-incidents-and-popup-cleanup.md) містять узагальнений практичний досвід.
 
 ## Перевірка пакета
 

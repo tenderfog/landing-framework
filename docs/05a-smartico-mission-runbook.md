@@ -1,109 +1,55 @@
 # Налаштування Mission у Smartico BO
 
-Використовувати для створення, зміни або аудиту mission-backed промо. Спершу прочитати [межі інтеграції](05-smartico-missions-journeys.md). Налаштування в BO не дає дозволу на Production activation: дія має відповідати scope поточного запиту.
-
-UI Smartico може змінюватися між labels/версіями. Шляхи нижче — орієнтири для пошуку; назви полів перевіряти у відкритому BO. Не вигадувати неіснуючий selector/API для масового редагування.
+Процедура створення, зміни й аудиту mission-backed промо. Вибір механіки, типів recurrence, API/cache та reset пояснено в [missions/state KB](../smartico-knowledge/02-missions-and-state.md); тут фіксуємо дії й результат у BO. Меню/поля перевіряти у фактичному tenant, а activation виконувати в scope поточної задачі.
 
 ## Вхідні дані
 
-Потрібні: campaign key, ENV/Label/Brand, local start і exclusive end, IANA timezone, segment/eligibility owner, тип повторення, opt-in, критерій completion, reward owner, mission visibility, вимоги мов. Відсутній bonus ID не замінюється випадковим Production bonus. QA placeholder можна вибрати лише в погодженому QA середовищі й записати, що він не сертифікує суму/гру/FS.
+Заповнений [Smartico blueprint](../templates/smartico-blueprint.md): ENV/Label/Brand, campaign key, visibility/audience, prerequisites, opt-in/task criterion, reward owner, start/exclusive end, timezone, recurrence, локалі та QA policy. Відсутній reward ID не замінювати випадковим Production bonus; дозволений QA placeholder не сертифікує production terms.
 
-Приклад конфігурації — **навчальний, без реальних ID**:
+## 1. Знайти чинний об'єкт або створити Draft
 
-```yaml
-campaignKey: campaign_summer
-environment: stage
-mission:
-  id: null # заповнити після save у правильному label
-  internalName: SC Summer QA Daily Entry
-  descriptionUk: Щоденний вступ до тестової акції
-  type: scheduled-recurring
-  requiresOptIn: true
-  recurrence:
-    timezone: Europe/Kyiv
-    localTime: '00:00'
-    period: calendar-day
-  rewardOwner: journey
-  completion: verified-mission-opt-in-event
-```
+1. Зафіксувати selected ENV/Label/Brand і доступи. У **Gamification → Missions** знайти campaign key/internal name й прочитати наявну mission/task та зв'язки перед edit.
+2. Якщо потрібний новий об'єкт — **Create**, початковий status Draft. Записати ID, task IDs, status і source/readback без персональних даних. [Mission setup](https://help.smartico.ai/welcome/products/gamification-basics/missions/how-to-set-up-a-mission).
+3. При clone звірити dates, audience, tasks, rewards і public texts. При правці чинного flow не створювати паралельну mission.
 
-Це власний config schema, не JSON імпорту Smartico. `completion` означає вибраний бізнес-контракт; точну подію в Query Builder треба знайти й перевірити.
+## 2. Тип, content, visibility та eligibility
 
-## 1. Перевірити оточення та наявні об'єкти
+Обрати тип за [таблицею mission models](../smartico-knowledge/02-missions-and-state.md#типи-місій-та-видимість). Назва demo не встановлює lifecycle. Заповнити internal name Latin, службовий description українською, player-facing content — за locale. Якщо Name публічне, не використовувати його як службовий QA key.
 
-1. У відкритому BO зафіксувати selected environment, Label і Brand. Перевірити URL/назву середовища та доступні permissions.
-2. У **Gamification → Missions** пошукати campaign key/internal name. Прочитати наявну mission і зв'язки; не створювати дубль, якщо задача — виправити існуючу.
-3. Записати mission ID, status, tasks IDs, recurrence і segment. Зберегти screenshot або export без персональних даних.
-4. При clone перевірити скопійовані dates, сегменти, reward activities й public texts. Clone має бути адаптований до нового campaign, а не мати приховану стару нагороду.
+Увімкнути explicit opt-in, коли entry потребує активного вибору. Звірити visibility mission/task і server eligibility з approved business rule. Приховування з каталогу не означає locked або завершений стан. Для QA записати відмінну політику окремо; не оголошувати all users без перевірки actual label/audience.
 
-Офіційна точка створення — **Gamification → Missions → Create**; новий об'єкт починається Draft. Види й основні поля описано в [How to set up a Mission](https://help.smartico.ai/welcome/products/gamification-basics/missions/how-to-set-up-a-mission).
+Якщо missing prerequisite не має витрачати спробу, її preflight/інформаційний flow відбувається **до opt-in**. Server recheck лишається; [pattern](21-promo-patterns.md#2-prerequisite-перед-irreversible-entry).
 
-## 2. Вибрати тип за бізнес-правилом
+## 3. Task і trigger chain
 
-| Механіка | Тип / рішення |
-| --- | --- |
-| Нова спроба всім за щоденним розкладом | Scheduled recurring mission |
-| Нова спроба одразу після completion | Recurring upon completion; це не midnight reset |
-| Спочатку виконати unlock condition | Locked mission + перевірена unlock task |
-| Один раз за campaign | Неповторювана mission з відповідними dates/caps |
-| Видати конкретним користувачам через flow | Featured/assigned механіка, якщо вона відповідає spec |
+У **Add Task** визначити type, exact event/conditions, progress increment, count/sum/unique attribute, frequency/weight, points і task reward. Для entry-only mission із Journey-owned reward нульові points/task reward — допустиме рішення за spec, а не автоматичний default.
 
-`Locked + Opt In DEMO` не універсальна starting point. Назва демонстраційної місії не встановлює потрібний recurring lifecycle. [Recurring upon Completion](https://help.smartico.ai/welcome/products/gamification-basics/missions/recurring-upon-completion-missions) описує іншу поведінку, ніж календарна recurrence.
+Якщо task завершують opt-in цієї mission, знайти actual event і exact mission ID. Якщо слухають Client Action — зареєстроване case-sensitive name/payload filters за [05c](05c-smartico-client-actions.md). Не додавати frontend complete action, коли opt-in уже достатній, і не дублювати ту саму винагороду в mission та Journey.
 
-## 3. Налаштувати поля, visibility та eligibility
-
-Заповнити internal name латиницею, службовий description українською. Public title/description/reward/CTA локалізувати за approved content. Якщо є лише одне поле Name і воно показується гравцю, не плутати його з internal name.
-
-Увімкнути explicit opt-in, коли entry потребує активного вибору. Перевірити видимість mission/task у gamification widget: приховування task list не змінює eligibility чи completion.
-
-Не змішувати segment і unlock. Segment може повністю приховати mission; locked mission може бути видимою, але недоступною. Segment має залишатися коректним після виконання умови, інакше вже завершена mission може зникнути до claim. [Missions](https://help.smartico.ai/welcome/products/gamification-basics/missions).
-
-Для Production обмеження KYC/deposit/country тощо потрібні server-side, навіть якщо лендінг уже веде на верифікацію. Для QA записати окрему дозволену eligibility політику. Не заявляти «all users» без перевірки scope label та trigger.
-
-## 4. Створити task і не подвоїти reward
-
-У **Add Task** визначити task type, action event, progress increment, кількість completions, points та task reward. Для entry-only місії, де винагороду видає Journey, points/task reward зазвичай нульові; інша політика має бути явно затверджена.
-
-Якщо task повинна completion на opt-in цієї mission, знайти доступний event і вказати точний mission ID. Якщо task слухає Client Action, вказати точне action name/payload filters за [Client Action runbook](05c-smartico-client-actions.md).
-
-Не додавати водночас mission reward і Journey Bonus для однієї винагороди випадково. Не надсилати frontend «complete» action поряд із native mission opt-in, якщо один event уже достатній для task/entry. Потрібна одна доведена trigger chain.
-
-Записати:
+Записати й перевірити trace:
 
 ```text
 User intent → sender/operation → observed event → task filter → completion → Journey entry
 ```
 
-Якщо назва події невідома, завершити підготовку Draft і знайти її через BO/current integration owner або sanitized QA trace. Не підміняти її guessed event name.
+Якщо exact event невідомий, лишити Draft і знайти його в BO/current contract або sanitized QA trace; guessed event name не є реалізацією.
 
-## 5. Налаштувати час у backend
+## 4. Backend schedule і readback
 
-1. Ввести campaign availability start/end у фактичній timezone BO. Для дат «до N включно» зберігати наступну локальну північ як exclusive end у spec й перевірити UI semantics.
-2. В recurring schedule вибрати календарний інтервал і reset. Не використовувати time-to-complete як заміну reset.
-3. Якщо business timezone IANA, а BO має тільки UTC або fixed offset, скласти UTC runs для всього періоду; перевірити DST. Фіксований «00:00 user timezone» теж не тотожний 00:00 Kyiv для всіх гравців.
-4. Відкрити **See next runs** або еквівалент. Записати щонайменше першу QA доступність, звичайний наступний reset, run до й після DST, фінальний run.
-5. Зберегти й повторно відкрити mission: visible values мають збігатися з spec.
+1. Ввести start/end у фактичній timezone BO; для «до N включно» у spec зберегти наступну локальну північ як exclusive end і перевірити semantics поля.
+2. Налаштувати recurrence; time-to-complete не підміняє reset. Якщо BO має лише UTC/fixed offset, підготувати runs для всього campaign window із DST.
+3. Відкрити **See next runs** або еквівалент: записати first availability, звичайний reset, runs до/після DST та фінальний run.
+4. Save → re-open → звірити значення зі spec. Після зміни active schedule перевірити actual user cycle на boundary: countdown не доводить backend reset.
 
-Активована recurring mission може чекати першого scheduled reset, перш ніж стати доступною. Для тесту сьогодні можна використати дозволений QA first run у найближчий час, після тесту відновивши погоджений schedule. Це контрольована QA зміна з записом before/after; не рухати Production reset усім користувачам без task scope. [Recurring Missions](https://help.smartico.ai/welcome/products/gamification-basics/missions/recurring-missions).
+Active recurring mission може чекати першого scheduled run. Для QA дозволений окремий first run/cadence з before/after і фактичним відновленням schedule; мінімальний інтервал перевірити Save/validation, не вигадувати. Індивідуальний reset і додатковий run усій аудиторії мають різні наслідки — [reset policy](../smartico-knowledge/02-missions-and-state.md#reset-для-повторного-qa).
 
-Зміна schedule вже активної mission може не мігрувати миттєво існуючий user cycle. Перевірити реальний QA user після boundary; frontend countdown не доводить reset на сервері.
+## 5. Activation та наскрізна перевірка
 
-## 6. Перед activation
+- Draft перечитано; dates, audience, rewards, task filters і first availability звірено.
+- Mission ID потрапив у config потрібного ENV; [Journey](05b-smartico-journey-runbook.md) має exact trigger і готові assets.
+- Відомі attempt-consumption point, grant owner, missing/hidden/error policy та дозволений QA/activation scope.
+- Прочитано actual status-transition warning: Archive не використовується як тимчасова пауза без підтвердженої можливості відновлення.
 
-- Draft saved/reopened; усі дати, segment, rewards, task filters перевірено.
-- Mission ID передано landing config правильного середовища.
-- Journey Draft має точний trigger і готові popup assets; [Journey runbook](05b-smartico-journey-runbook.md).
-- Визначено first availability, recurrence, entry cap, grant owner та поведінку hidden/missing mission.
-- Зафіксовані target/scope activation й план QA; реальний opt-in може запустити grant.
+Спочатку read-only перевірити actual identity, mission list/exact ID, lifecycle flags і timer. Потім погоджений QA opt-in: response → task/completion → Journey → popup/action → grant. Read-only read або BO Preview не сертифікує решту.
 
-Зміна status Active може мати обмеження подальшого повернення до Draft/відновлення Archived. Перед натисканням прочитати актуальне BO попередження; не архівувати об'єкт як «нешкідливе скасування». Activate тільки потрібні об'єкти в погодженому середовищі.
-
-## 7. Після activation: перевірити ланцюг
-
-Спершу read-only: actual host iframe/native identity, mission list, exact ID, locked/opt-in/completed flags, timer. Потім узгоджений QA-player opt-in: response → task/completion → Journey entry → popup render → action → grant. Read-only read не сертифікує решту.
-
-Повторити на іншому користувачі, reload/reconnect, двох вкладках, logout/login, reset boundary. Нова спроба має залежати від server state, а не збереженого локального «used today». [QA](13-qa.md).
-
-## Артефакт результату
-
-Віддати mission inventory із ID/tasks/status, screenshots saved values/next runs, timezone table, записом changes, доказом read/opt-in окремо та невирішеними питаннями. Не залишати «готово», якщо перевірено тільки BO Preview.
+Виконати affected [state/reset/account-switch QA](13-qa.md), зафіксувати actual Web/App evidence. Результат: inventory ID/tasks/status, saved values/next runs, timezone table, diff before/after, докази read/opt-in/runtime й відкриті залежності.

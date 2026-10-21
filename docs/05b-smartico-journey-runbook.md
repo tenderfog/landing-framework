@@ -59,11 +59,9 @@ flowchart TD
 
 Якщо mission completion уже запускає Journey, не додавати другий Client Action entry «для надійності». Якщо потрібні два незалежні способи входу, явний backend дедуп/cap та acceptance мають покривати їх перетин.
 
-Перевірити eligibility segment, control group, active period, daily hours, maximum duration, entry mode та per-user caps. Повторний entry не повинен скасувати pending grant або заново resample результат. `Stop and Start`/once-per-open/lifetime — вибір механіки, не default цього playbook.
+У General/entry settings заповнити eligibility segment, control group, active period/daily hours, maximum duration, exact entry mode й доступні per-user caps. Перечитати фактичні values після save. Label-dependent max entries і timezone/rolling semantics перевірити в BO — [Campaigns](https://help.smartico.ai/welcome/products/crm-automation/create-journey-flow).
 
-Для Client Action calendar cap не підміняти rolling 24h. Доступність опції max entries залежить від label settings. [Campaigns entry settings](https://help.smartico.ai/welcome/products/crm-automation/create-journey-flow) пояснює обмеження; факт наявності й timezone semantics перевіряється у вашому BO.
-
-**Entry cap, grant idempotency та grant-day cap — різні правила.** Зафіксувати `grantDayBasis`: календарний цикл спроби або день фактичної видачі. Якщо popup відкрито до півночі, а Claim/X натиснуто після, наступна денна спроба може дати другий grant тієї самої дати навіть при одному entry на цикл. Це допустимо або заборонено лише за business contract. Для вимоги «максимум одна видача за фактичний день Kyiv» потрібен атомарний server cap по user + campaign + визначеному календарному дню, із поведінкою pending/failed grant. Якщо підтриманої BO можливості недостатньо — backend dependency, не guessed toggle. Повторна доставка того самого attempt не створює новий grant; перехід через північ не має губити вже підтверджену винагороду. Окремий QA case: старий pending до reset → Claim/X після reset → новий entry.
+Рішення щодо re-entry, pending grant, `grantDayBasis`, atomic cap та окремих календарів приймаються за [Journey/reward model](../smartico-knowledge/03-journeys-and-rewards.md), а не default toggle. Додати boundary QA: pending до reset → Claim/X після → новий entry.
 
 ## 4. Спочатку template й creatives, потім Activities
 

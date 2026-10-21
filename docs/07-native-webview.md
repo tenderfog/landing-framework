@@ -93,12 +93,12 @@ Reports мають пройти до disposal; черга й dedup залежа�
 Handshake/impression не доводить, що content root має HTML. Послідовність діагностики:
 
 1. Повний server event/params передано саме в wrapper.
-2. Template engine скомпілював Body без exception; `tmpl('_template', params)` окремо пройшов.
+2. Для legacy mode actual template engine скомпілював Body без exception і `tmpl('_template', params)` окремо пройшов; для Vibe/іншого mode перевірено його actual saved output/runtime, без нав'язування legacy compiler.
 3. Root містить visible content; external images/fonts доступні за CSP/CORS.
 4. Native view має правильні bounds/opacity/z-order; creative не shrink-wrap/zoom.
 5. Наступний click report/connector працює на current session.
 
-Literal `%}` у minified CSS і вшиті assets — відомі пастки; [template runbook](06-smartico-popup-templates.md). Якщо existing handshake уже працює, не переписувати native integration через creative compilation error.
+Для legacy templates literal `%}` у minified CSS і вшиті assets — відомі пастки; [template runbook](06-smartico-popup-templates.md). Якщо existing handshake уже працює, не переписувати native integration через creative compilation error. Authoring/runtime mode підтверджується за [popup KB](../smartico-knowledge/04-popups-and-routing.md).
 
 ## 6. Navigation для bonus/game/category
 

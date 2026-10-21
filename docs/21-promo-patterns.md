@@ -44,21 +44,9 @@ Preflight не є атомарною гарантією: між read і entry п
 
 ## 3. Eligibility projection і freshness
 
-| Факт | Що він доводить | Чого не доводить |
-|---|---|---|
-| Product approved event | Операція сталася за product contract | Smartico уже обробив подію |
-| Подія у Smartico history | Smartico отримав дані | Rule match і public projection вже завершені |
-| Server-side condition/tag | Rule/server бачить право | Поточний client snapshot свіжий |
-| Public property/JS marker | UI може показати next step | Клієнт отримав право вирішувати grant |
-| UI available | Є свіжі входи за adapter contract | Сервер обов'язково прийме concurrent entry |
+Для derived eligibility скласти mapping: source event → producer → matching rule → server condition → public projection → UI reader → lifetime/revoke policy. Формалізація qualifying event належить campaign brief, CRM mapping — blueprint, transport/schema — integration contract.
 
-Для derived eligibility потрібна mapping-картка: source event → producer → matching rule → server condition → public projection → UI reader → campaign lifetime/reset/revoke policy. «Мітка» без уточнення типу недостатня; Label, Label tag, user/JS marker, property та segment мають різні ролі.
-
-Read/update semantics перевіряти для конкретного API. Full snapshot замінює попередні дані, partial update змінює лише наявні поля. Відсутнє поле в patch не дорівнює порожньому масиву. Initial missing/malformed data не перетворюється на false/available. Exact key/tag match не замінюється substring matching.
-
-State service має identity epoch, environment/campaign context, freshness і контроль late responses. Background revalidation зберігає відомий layout і не перебудовує кнопку між pointerdown/pointerup. Stale business action при цьому може бути заблокована, але unrelated navigation не повинна вимагати другого кліку.
-
-Повернення з каси/foreground — привід для підтриманого reread, не blind replay entry. Якщо approved event і marker вже є, діагностуємо client projection, не радимо ще один депозит. SLA затримки має підтверджувати data owner; довільний timeout не стає гарантією платформи.
+Повний snapshot, partial patch, cache й subscription semantics описані в [State KB](../smartico-knowledge/02-missions-and-state.md). Для затримки пройти [investigation chain](../smartico-knowledge/05-investigation-and-analytics.md), не пропонувати новий депозит лише через старий UI. У pattern важливі два UX рішення: revalidation не перебудовує кнопку посеред gesture, а повернення з каси запускає read, не replay entry. [State UI](04-state-and-time.md), [bug evidence](22-incidents-and-popup-cleanup.md).
 
 ## 4. Realtime, backfill і environment isolation
 
@@ -68,46 +56,25 @@ External user IDs можуть збігатися між Stage/Production. Із�
 
 Для зміни future-only policy іноді достатньо нового versioned marker namespace/cutover. Це не універсальне правило naming. Масове очищення попередніх markers може пошкодити інші сценарії; спочатку перевірити dependency/ownership. Backfill не вважається автоматично дозволеним самим формулюванням «врахувати депозит за період».
 
-## 5. П'ять різних обмежень
+## 5. Які обмеження потрібні pattern
 
-| Механізм | Що обмежує | Чим його не можна підмінити |
-|---|---|---|
-| Local pending guard | Повторний sender в одному UI instance | Server one-per-user policy |
-| Journey entry mode | Новий вхід при відкритому/минулому Journey | Atomic reward cap або rollback місії |
-| Mission/attempt cap | Допущені спроби визначеного циклу | Popup communication CAP |
-| Communication CAP/queue/suppression | Доставку повідомлень | Право на payout і гарантію одиничного grant |
-| Grant idempotency / payout cap | Повтор тієї самої транзакції / бізнес-ліміт видачі | Звичайна marker перевірка перед асинхронним write |
+Для обраного flow окремо заповнити local pending policy, Journey re-entry, mission/attempt cap, communication policy і reward idempotency/business cap. Вони не замінюють одне одного; точні відмінності, marker races та `smartico_bonus_id` — у [Journey KB](../smartico-knowledge/03-journeys-and-rewards.md).
 
-Один `smartico_bonus_id` захищає конкретний повторний bonus request за bonus integration contract. Два незалежні attempts можуть мати різні IDs. Для «не більше однієї винагороди за локальний день» потрібний визначений atomic server owner/key й поведінка pending/failed/retried grant. Звичайне «read marker → write marker» може програти race.
-
-Activity throughput limit не є per-user cap. Умова entry once-per-open не гарантує once-per-day. `Stop and Start` може перервати активний flow/pending grant; обирати його за механікою, а не як універсальне виправлення завислого тесту.
+Composition check: pending до півночі → claim після reset → новий entry. Визначити, чи cap рахується за cycle спроби або фактичним днем видачі, що робити з pending/failed і який server механізм забезпечує атомарність. Відповідь записується в blueprint; браузерний guard цього не гарантує.
 
 ## 6. Informational popup без накопичення запитів
 
-У дослідженому інциденті нові informational requests накопичувалися під час придушення popup host-ом і пізніше відображалися серією. Короткий frontend cooldown не очищував CRM queue.
+Для підказки без reward потрібні один sender, finite pending/expiry і явний момент завершення request. Розглядати Once during open journey та завершення на SDK-reported Impression/Failed можна лише після перевірки actual activity contract. Impression не доводить visible content або user close; якщо flow завершився до закриття popup, повторний entry знову можливий.
 
-Перевіряємо весь lifecycle:
+Queue/login delays/CAPs/suppression та candidate pattern обмеження описані в [Popup KB](../smartico-knowledge/04-popups-and-routing.md), фактичне збереження й неповний end-to-end proof — у [incident catalog](22-incidents-and-popup-cleanup.md). Не переносити цей lifecycle на reward Journey або додавати permanent latch без supported recovery.
 
-1. Один accepted intent запускає один sender. Pending охоплює фактичне очікування delivery за доступними сигналами.
-2. Entry mode узгоджений із життям popup request. Наприклад, `Once during open journey` може тримати один informational instance, поки delivery очікується.
-3. Вихід popup activity використовує підтримані delivery outcomes, а не generic Then як доказ показу. Для простого notification закриття Journey після SDK-reported Impression/Failed може бути доречним, але Impression **не гарантує видимого контенту або закриття користувачем**.
-4. No-result/max-duration/expiry paths обмежені. Success і Failure не запускають новий request без нового наміру.
-5. Окремо перевіряються global login/inter-popup delays, queue, CAP/cannibalisation, URL/device/session suppression та retention.
-6. Actual QA: клік → каса → повернення → багато кліків → foreground/wait → кількість реальних popup. Saved BO settings самі не доводять результат.
+Acceptance цього recipe: клік → каса → повернення → повторні кліки → foreground/wait → фактична кількість popup/entries. Saved BO settings не замінюють цей тест.
 
-Цей pattern не переноситься механічно на reward Journey, де очікуються choice/grant. Якщо close/delivery ACK недоступний, це явна capability gap. Не вигадувати нове bridge message й не ставити permanent latch, який назавжди блокує retry або чужі vendor handlers.
+## 7. Повторне QA без зміни механіки
 
-## 7. Що саме означає reset
+Спочатку визначити, що саме заважає повтору: marker, mission/cycle, open Journey, pending engagement чи вже виданий bonus. Це незалежні lifecycle — [State KB/reset](../smartico-knowledge/02-missions-and-state.md#reset-для-повторного-qa).
 
-| Дія | Можливий ефект | Що лишається незалежним |
-|---|---|---|
-| Прибрати eligibility marker | Змінити gate/відображення | Mission completion, open Journey, уже виданий bonus |
-| Новий recurring run | Новий server cycle для заданої аудиторії | Попередні grants/історія; можливість extra attempt |
-| Завершити/перезапустити Journey | Змінити execution instance | Mission state/financial transaction |
-| Очистити client cache/reload | Отримати свіжі доступні дані | Backend entitlement/attempt/bonus |
-| Bonus reversal/compensation | Financial operation за окремим contract | Mission/eligibility не скидаються автоматично |
-
-Per-user reset recurring mission не вважати доступним без актуального supported шляху в tenant. Додатковий recurring run для всіх не називати harmless account reset. Для QA використати погоджену cadence або інший тестовий account, з відновленням server schedule, open-Journey bounds і UI deadline разом. Мінімальні інтервали перевіряти фактичним Save/validation, не обіцяти довільну кількість хвилин.
+Для recipe використати dedicated test role або підтриманий reset потрібного scope. Додатковий recurring run для всіх може дати extra attempt, а не очистити один account. Якщо cadence змінювали, разом відновити server schedule, open-Journey bounds і UI deadline та зберегти readback. Мінімальний інтервал підтверджується фактичним Save/validation, не довільним countdown.
 
 ## 8. Display metadata не дорівнює бізнес-доступності
 

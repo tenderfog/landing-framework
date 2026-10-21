@@ -4,10 +4,11 @@
 
 ## Джерела та ціль
 
-- Design mode: `from-figma` / `from-brief`.
+- Design source: `from-figma` / `from-brief`.
+- Authoring mode: `Vibe` / `legacy Configuration-Body` / інший підтверджений mode; capability source/date:
 - Figma exact nodes / brand reference / copy source / date:
 - Campaign purpose, owner, environment/label/brand:
-- Existing template ID / creatives / Journey ID (або ще не створені):
+- Existing saved design/template / resource variations / Journey bindings (або ще не створені):
 - Host: Web SDK / Swift WKWebView build / React Native Android build:
 - Layout: contained / fullscreen; outer host owner/evidence:
 - Locales, supported viewport ranges, text scale:
@@ -32,20 +33,20 @@
 - Product routes та підтримка native dispatcher:
 - Duplicate click UX / server idempotency / grant cap owner:
 
-## Template і ресурси
+## Implementation і ресурси
 
 - Anatomy, tokens, mobile/desktop differences:
-- Params: names/types/defaults/required/optional/missing semantics:
+- Legacy params: names/types/defaults/required/optional/missing semantics, якщо застосовується:
 - Asset URL register: origin, format, dimensions, bytes, cache/CORS, locale, source:
 - Long-label, image/font failure, loading та reduced-motion fallback:
-- Actual template engine source/version/hash:
-- Analytics event names, platform/device fields, agreed transport owner:
+- Legacy engine source/version/hash або actual authoring/runtime version:
+- Analytics collection mode: DOM hooks / programmatic / native; approved hooks/events і collector owner:
 
 ## Готовність
 
-- Configuration/Body/values paths, exact compiled export hash:
-- All variants/flags/locales engine check:
+- Legacy Configuration/Body/values paths/hash або saved Vibe design/resource version:
+- All variants/flags/locales: legacy compiler check або actual supported authoring preview/runtime:
 - Screenshots і interaction evidence Web:
 - WKWebView / RN Android actual build evidence:
-- Saved template/creative IDs, Journey bindings, delivery preview:
+- Saved design/template/resource IDs, Flow link exits/connector matrix, fresh delivery:
 - Відкриті питання та залежності, власники, наступний крок:

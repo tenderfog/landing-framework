@@ -24,8 +24,8 @@
 | Джерело | Зафіксована версія | Використано |
 |---|---|---|
 | [onlineTeran/landing_doc](https://github.com/onlineTeran/landing_doc/) | Public snapshot `14f93e5c1f16ff349a52f10ec1c5bd1c2db47030` | discovery, design/copy/assets, product event actions, iframe bridge, analytics ownership, release |
-| Узагальнені інтеграційні висновки | [Анонімізований приклад щоденної акції](case-studies/daily-promo.md) | lifecycle, verification, календарний reset, cache, media та popup rendering |
-| Узгоджена схема назв аналітичних подій | `ga_{модуль}_{дія}_{елемент/результат}` | naming convention; словник конкретної кампанії, transport і validation suffix потребують окремого погодження |
+| Узагальнені інтеграційні висновки | [Incident catalog](docs/22-incidents-and-popup-cleanup.md), [patterns](docs/21-promo-patterns.md); private evidence audit 21.10.2026 | Actual cause/fix/proof limits та композиція наступних механік |
+| Історична аналітична конвенція | `ga_{модуль}_{дія}_{елемент/результат}` | Vocabulary reference; actual DOM/GTM/programmatic contract має пріоритет. Exact inventory — у project analytics plan |
 
 Пакет не копіює всю документацію upstream і не змінює вихідний repo. Він зберігає правила та приклади для embedded промо. У новій кампанії команда фіксує власну підтримувану версію bridge і звіряє її з host-контрактом; історичний snapshot не гарантує сумісності з майбутніми збірками.
 
@@ -58,20 +58,9 @@
 
 Для кожного запису додати owner, reviewed version, дату перевірки та статус `Contract`, `Observed`, `Example`, `Proposed` або `Unknown`. Не переносити внутрішні URLs, account identifiers, credentials чи raw profiles до публічної документації. Якщо затвердженого контракту немає, позначити це як невідоме, а не вигадувати API або route.
 
-## Уточнення до старих прикладів
+## Межі історичних прикладів
 
-| Старий приклад або припущення | Актуальне правило пакета |
-|---|---|
-| Raw product/external fallback href | Для цього профілю всі navigation links — підтверджений event_action; media/API URLs звичайні. |
-| `analytics_event` прямо у canonical bridge | Не існує в чинній schema; forwarding disabled до host/native контракту. |
-| User change = завжди reload | Потрібен documented SDK/adapter lifecycle для поточної версії; не використовувати старий identify=true. Reload може бути fallback, не єдина архітектура. |
-| Nuxt3, довільний framework або standalone HTML/JS як defaults | Обов’язкові Vue 3 + Nuxt 4; default delivery — generated static output. Corporate target та current CI беруться з repo, Vercel не є обов’язковим hosting. |
-| Activation+24h / reload+nextmidnight | Authoritative current cycle + confirmed calendar reset; прострочений consumed record викликає refresh, не новий день. |
-| `next_recurrence_date_ts` завжди є в public schema | Поле/units перевіряються в фактичній підтриманій API response; не використовувати як універсально гарантоване. |
-| `dp:action` завжди Client Action | Engagement control та named Client Action залежать від handler і explicit contract. |
-| `alpha:false` завжди швидше і гарантує WebView black background | Opaque output/dark base перевіряються на реальному GPU/WebView; режим context вимірюється, fallback обов'язковий. |
-| Мобільний Chrome = App QA | Потрібні actual WKWebView та Android RN WebView builds. |
-| Product `ga_*` name можна напряму віддати Firebase | Swift/Android Firebase резервують `ga_`; підтримати погоджений mapping product event → destination event у measurement adapter. |
+Виправлення старих припущень зафіксовані у [CHANGELOG](CHANGELOG.md). Чинні правила мають одного власника: [stack](docs/00-technical-stack.md), [bridge](docs/02-iframe-and-contracts.md), [navigation](docs/03-event-actions.md), [state/time](docs/04-state-and-time.md), [media](docs/10-media-animation-webgl.md), [analytics](docs/12-analytics.md) та [Smartico KB](smartico-knowledge/README.md). Історичний snippet не перекриває ці контракти; перед reuse звірити supported product/runtime version.
 
 ## Evidence vocabulary
 

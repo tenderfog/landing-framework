@@ -25,13 +25,11 @@
 
 Для кожної кнопки фіксуй rendered URL, click tracking, matched branch і navigation effect. Якщо URL змінюється через content tags, exact match може бути непридатний; documented `Click link contains…` застосовують за потреби, із досить конкретною ознакою та негативними тестами. Не розширюй усі фінансові branches до будь-якого click. [FAQ CRM Automation](https://help.smartico.ai/welcome/products/tools-and-guides/faqs/faq-crm-automation).
 
-## Legacy renderer: що з досвіду переноситься
+## Resource і variation — не delivery attempt
 
-Template задає anatomy/fields; resource задає values; variation обирає контент за локаллю/brand/умовами; Journey задає поведінку. Перевір active status і default fallback варіантів: збережена Draft variation не означає, що саме вона доставляється гравцю. [Content Variations](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/content-variations).
+Template/design задає структуру; resource — content values; variation обирається за locale/brand/conditions; Journey задає поведінку. Перевір active status і default fallback: збережена Draft variation не означає, що саме вона доставляється гравцю. [Content Variations](https://help.smartico.ai/welcome/products/crm-automation/communication-channels/content-variations).
 
-Actual compiler, runtime params, downloaded saved Body і real wrapper важливіші за mock HTML. Для legacy engine з `{% %}` literal CSS `%}` може бути delimiter collision; перевір після minification. Цей regression доводить механізм, а не автоматично причину будь-якого порожнього popup. [Template engine](https://github.com/smarticoai/JavaScript-Templates), [компіляційний приклад](../smartico-popups/examples/README.md).
-
-Reusable template параметризує content, artwork, 0/1/2 buttons, locale і close semantics. Assets мають окремі URL/cache; складний background не виправдовує великі embedded base64. Fullscreen потребує відповідного outer host viewport: child CSS не розширює обмежений iframe/WebView. [Popup technical runbook](../docs/06-smartico-popup-templates.md).
+Параметри, escaping, hooks, actual compiler й fullscreen mechanics мають одне джерело — [legacy runtime runbook](../docs/06-smartico-popup-templates.md). Історичні parser/click bugs не перетворюються на загальні властивості будь-якого popup; їхні докази й межі — у [каталозі інцидентів](../docs/22-incidents-and-popup-cleanup.md).
 
 ## «Натиснув, але popup не з'явився»: кілька різних очікувань
 
@@ -51,29 +49,18 @@ Reusable template параметризує content, artwork, 0/1/2 buttons, loca
 
 ## Проєктуй recovery, а не blind retry
 
-Для інтерактивної підказки можна розглядати Once during open journey та завершення на фактичному Impression/Failed із finite duration. У проєктному досвіді така конфігурація була збережена й перечитана; повний повторний сценарій каси залишився без незалежного end-to-end доказу. Це **кандидатний pattern**, не готова універсальна гарантія.
+Pending/dedup policy повинна покривати реальне очікування delivery, finite expiry та recovery. Entry mode не замінює popup lifecycle. [Кандидат informational pattern](../docs/21-promo-patterns.md) і його [historical proof limits](../docs/22-incidents-and-popup-cleanup.md) описані окремо; saved settings не є end-to-end гарантією.
 
 Impression — SDK/engagement report про показ, який окремо не доводить видимий непорожній контент або закриття. Якщо flow закрито на Impression, наступний entry може пройти, поки перша модалка ще на екрані. Для строгої вимоги «максимум одна відкрита/очікувана» потрібні підтримані lifecycle signals або серверна coordination policy. Не вигадуй acknowledgment у canonical bridge.
 
 Global delays/caps стосуються інших комунікацій також. Зафіксуй причину затримки й застосуй найвужчу дозволену зміну конкретного activity/flow. Відоме `CANNIBALISATION` у delivery log класифікуй як причину конкретної спроби; воно не доводить фінансовий bonus cap чи втрату користувача.
 
-## Native: мінімальний доказ наскрізної роботи
+## Native ownership і proof boundary
 
-Перевір окремо: отримання engagement → готовність wrapper → передача payload → rendered content → impression → click report → branch → product route → close cleanup. Handshake ready без content не доводить rendering. [Native integration guide](https://help.smartico.ai/welcome/technical-guides/front-end-integration/ios-android-clients-integration-guide) описує bridge та незалежні popup/gamification WebViews; ваш host має підтвердити фактичну реалізацію.
+[Native integration guide](https://help.smartico.ai/welcome/technical-guides/front-end-integration/ios-android-clients-integration-guide) описує bridge та незалежні popup/gamification WebViews; фактичну реалізацію підтверджує installed host. Click reporting і product navigation — різні канали; їхні capabilities та обидва routing sources перевіряються за [native contract](../docs/07-native-webview.md).
 
-Кнопка/хрестик має пропустити перший click до штатного tracking. Не запускай той самий deep link додатково через listener. Native Back/backdrop/Escape, scroll lock і повернення з каси належать host lifecycle. Після закриття перевіряй scroll, focus і наступне відкриття на реальних Swift/RN builds. Browser preview — окремий рівень доказу.
+Handshake/Impression без visible nonempty content не доводять render; browser preview не доводить Swift/RN behavior. Native Back/backdrop, focus/scroll cleanup і повернення з каси належать host lifecycle. First-click propagation, vendor hook та guard safety — у [06](../docs/06-smartico-popup-templates.md); конкретні tap/scroll failures — у [22](../docs/22-incidents-and-popup-cleanup.md).
 
-Локальний click guard має узгоджуватись із vendor acceptance та recovery. Постійна latch після першого pointer event може заблокувати повторну спробу навіть тоді, коли штатний handler ще не прийняв click. Не застосовуй її як універсальний рецепт: preserve першої vendor дії, контрольований pending/unknown state, можливість відновлення і серверний захист перевіряються разом.
+## Переналаштування й cleanup
 
-## Переналаштування, виправлення та очищення зайвого коду
-
-Почни з **фактично доставленого** popup: локальний Body може відрізнятися від збереженого у BO, а resource values — перекривати defaults Configuration. Інвентаризація містить authoring mode, template/resource/variation, locales, saved Body/hash, Configuration, effective params, зовнішні assets, поточний wrapper/engine і всі Journey references. Збережи до змін відновлюваний snapshot у приватному kit.
-
-1. Відтвори найменший failing state: конкретні params, width/height, locale, кнопки, крок flow. Класифікуй баг: дані/override, compiler, CSS/layout, delivery, click report, routing або host cleanup.
-2. Простеж залежності поля чи handler: Configuration → Body → creative overrides → rendered DOM → branch. Шукати треба також інші resources/variations на тому самому template. Поле, не використане локальним preview, ще може використовувати чинна кампанія.
-3. Прибирай підтверджено зайве: дубльовані listeners/senders, старі CSS variants, неіснуючі config fields, закоментовані експерименти, непотрібні SDK copies, assets без посилань. Зберігай потрібні action hooks, escaping, native lifecycle та fallback. Shared assets видаляй лише після inventory усіх споживачів.
-4. Якщо змінюється schema, онови Body, Configuration, defaults і resource values разом. Не перевинайменовуй ID/field без перевірки старих overrides. Зміну в спільному template оцінюй як зміну для всіх bound resources.
-5. Перевір саме final export actual compiler: 0/1/2 buttons, missing optional fields, long translations, усі visual states, compiler delimiters, runtime errors, HTTPS assets і resource sizes. Для Vibe перевір actual saved preview/output; legacy compiler pass не доводить Vibe compatibility.
-6. Збережи, відкрий знову й порівняй effective values. Пройди реальну delivery → impression → click → branch → grant/navigation послідовність, закриття та повторне відкриття. Web і native QA фіксуй окремо; якщо native build недоступний, познач саме цю неперевірену частину.
-
-Мінімальний результат cleanup — зрозумілий diff із причиною видалення та перевірками поведінки. Саме скорочення bytes або зникнення console error не доводить, що кнопка далі проходить Journey і не дублює дію. Існуючий [compiler check](../smartico-popups/examples/README.md) та [implementation contract](../smartico-popups/implementation-contract.md) використовуй повторно.
+Єдина процедура inventory → dependency check → мінімальне видалення → schema/defaults/overrides sync → regression → save/readback → fresh delivery міститься в [incident/cleanup runbook](../docs/22-incidents-and-popup-cleanup.md). Для передачі користуйся [implementation contract](../smartico-popups/implementation-contract.md), для legacy regression — [runnable checker](../smartico-popups/examples/README.md). Скорочення bytes саме не доводить правильний branch/grant або роботу native controls.

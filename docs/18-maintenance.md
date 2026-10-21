@@ -1,30 +1,39 @@
-# Як підтримувати інструкції та повторно використовувати досвід
+# Підтримка framework без дублювання
 
-## Версія й adoption
+## Версія та adoption
 
-Зберігати пакет як reviewed Git tag/commit. Landing repo містить посилання/копію/submodule відповідно до CI доступу; під час кампанії не оновлювати methodology випадковим pull. `AGENTS.md` у landing root вказує entrypoint та project overrides. Portable skills читаються з пакета або встановлюються окремо за рішенням команди; їх наявність у Git не означає глобальне auto-discovery.
+Зберігати reviewed Git commit/tag. Project repo посилається на pinned framework і власні overrides у root `AGENTS.md`; не змінювати methodology випадковим pull під час кампанії. Portable skills читаються з пакета або встановлюються окремо — файл у Git не означає global auto-discovery.
 
-## Джерела змін
+## Одне канонічне місце для кожного виду знання
 
-Новий реальний інцидент додається спочатку як case evidence: environment, build/version, platform/device, reproduction, observed symptom, exact cause confidence, fix, tests, scope. Після незалежної перевірки переносити правило у відповідний doc; не копіювати весь чат.
+| Вид матеріалу | Власник змісту | Що лишається в суміжних файлах |
+|---|---|---|
+| Smartico concepts, API semantics, versioned facts | `smartico-knowledge/` + його [джерела](../smartico-knowledge/SOURCES.md) | Коротке правило й посилання на потрібний контракт |
+| Процедурне Mission/Journey/Client Action налаштування | `docs/05a`, `05b`, `05c` | Не друга повна копія SDK/lifecycle tutorial |
+| Legacy Configuration/Body, actual compiler/runtime | [06](06-smartico-popup-templates.md) | Дизайн-сценарії й KB посилаються на технічний контракт |
+| Incident mechanism, actual fix, proof limits | [22](22-incidents-and-popup-cleanup.md) | [15](15-troubleshooting.md) містить лише symptom/evidence/route index |
+| Project values та acceptance | `templates/` | Порожні поля/checklists із посиланням на guide, без копії guide |
+| Виконуваний приклад | `examples/` або `smartico-popups/examples/` | Пояснення behavior/меж, без другої реалізації в prose |
+| Брендова capability, ENV/entity map, campaign facts | Приватні product profile та campaign kit | У shared framework лише pattern і спосіб перевірки |
 
-Не перетворювати випадкові dates/mission IDs/colors у global defaults. Наприклад «description16/24» — підтверджений дизайн одного template, а універсальний закон — tokens із approved Figma. `alpha:false` у smoke одного build не доводить найкращу performance кожного GPU.
+Navigation table, короткий safety invariant і згадка причини посилання — корисне повторення. Другий повний checklist, payload, словник метрик або інструкція з окремими defaults — кандидат на об'єднання.
+
+## Новий досвід → правило
+
+1. Зберегти приватний evidence record: environment/build/platform, reproduction, observed symptom, cause confidence, actual change, before/after tests та scope.
+2. Перевірити primary source або відтворення й суперечності з чинним product contract. Підтверджена reproduction механізму не обов'язково встановлює причину original production delivery.
+3. Знайти канонічний файл у таблиці. Спочатку виправити/доповнити наявний розділ; створювати новий лише для окремої відповідальності.
+4. Перенести узагальнений вибір, applicability і regression. Випадкові dates, IDs, colors, parser workarounds і device settings не стають global defaults. Для нерозв'язаної причини зберігати investigation recipe, не MUST.
+5. У суміжних docs залишити короткий route; синхронізувати тільки affected templates/examples/QA. Старе пояснення, яке суперечить новому, замінити, а не дописати поруч третю версію.
 
 ## Зміна API/host
 
-Для нового bridge message/native capability/Smartico schema потрібні owner, version, consumer, rollout, fallback та tests. Відредагувати sources, integration template, doc, examples і QA разом. Old snapshots лишаються історією, не інструкцією використати deprecated method.
+Для нового message/schema/capability зафіксувати owner, version, consumers, rollout, fallback та tests; оновити sources, contract, implementation/example і QA разом. Historical snapshot лишається доказом минулої поведінки, не instruction використати deprecated method.
 
-Новий Client Action name сам по собі не вимагає нового App release, якщо transport та generic dispatcher уже підтримані. Новий тип native event action, RPC чи popup capability може вимагати App/host update. Фіксувати цю різницю, а не обіцяти «будь-яка акція автоматом».
+Новий Client Action name може використовувати чинний generic sender без App release; новий тип routing/RPC може вимагати host/native зміни. Перевіряти capability, не обіцяти автоматичну сумісність.
 
-## Review нового знання
+## Перед публікацією або видаленням
 
-1. Який конкретний вибір наступного агента змінює це правило?
-2. Чи підтверджена його applicability для Web і/або App?
-3. Чи є primary source або відтворюваний доказ?
-4. Чи конфліктує воно зі чинним product contract?
-5. Чи вистачить прикладу/optional recommendation замість MUST?
-6. Чи не дублює воно інший doc і не приховує permission boundary?
+Звірити scope, repo visibility, internal links, JSON/examples і affected checks. Прибрати приватні artifacts/secrets/temp paths; production assets не додаються лише для прикраси docs. Для видаленого/об'єднаного файла знайти всі inbound links і оновити entrypoints/sources. Порожній compatibility stub потрібний тільки за реальних зовнішніх consumers; Git history зберігає попередню редакцію.
 
-## Перед upload до Git
-
-Перевірити внутрішні links/examples/scripts, прибрати приватні artifacts/secrets/temp paths, звірити visibility repo, додати owner і reviewedversion. Публічна версія використовує умовні IDs та domains; приватні джерела й конкретна entity map лишаються в project kit з відповідним доступом. Не додавати productionassets тільки для прикраси документації. Публікацію у Git виконувати в межах запиту користувача за вказаним repo/visibility.
+Перед вилученням runtime коду перевірити consumers і safety invariants за [cleanup runbook](22-incidents-and-popup-cleanup.md). Source/fixture/history самі по собі не є runtime bloat; видалення не повинно прибирати validation, error recovery або чинну backward compatibility.

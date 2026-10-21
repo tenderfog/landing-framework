@@ -6,45 +6,11 @@
 
 Пов'язані матеріали: [пошук причини за симптомом](15-troubleshooting.md), [popup runbook](06-smartico-popup-templates.md), [Smartico knowledge base](../smartico-knowledge/README.md), [профіль продукту й investigation](20-product-profiles-and-investigation.md), [запис дослідження](../templates/investigation-record.md).
 
-## 1. Спочатку знайти етап, на якому зупинився сценарій
+## 1. Як читати каталог
 
-Одна видима проблема може мати кілька незалежних причин. «Чорний popup», «не працює кнопка» і «немає бонусу» недостатні для вибору виправлення.
+Це місце для **механізмів реальних інцидентів, фактичних змін та меж їхнього підтвердження**. Перший розрив у flow шукаємо за [investigation workflow](20-product-profiles-and-investigation.md); початкові симптоми зведено в [індекс](15-troubleshooting.md). Не потрібно перечитувати весь каталог для кожного бага.
 
-```text
-Намір користувача
- → підтриманий sender
- → подія отримана / mission opt-in прийнятий
- → Journey admission
- → потрібна activity
- → communication admission
- → delivery / queue
- → wrapper і compiler
- → DOM та ресурси
- → фактична видимість
- → взаємодія
- → engagement click / named action
- → потрібний connector
- → бонусний запит / відповідь
- → стан нагороди в продукті
- → навігація
- → оновлена проєкція стану в UI
-```
-
-Це діагностична модель, не універсальний список Smartico event names. Конкретні acknowledgment, поля й доступні журнали беруться з чинного integration contract.
-
-Для кожного переходу записати: що очікуємо побачити, де це перевіряється, хто володіє етапом, фактичний час і версію. Не переносити токени, user hash, cookies або повні профілі до журналу. Один успішний етап не підтверджує наступний: impression не доводить читабельний DOM, клік не доводить grant, позитивна API-відповідь не завжди доводить появу бонусу в потрібному продуктовому стані.
-
-### Ступені впевненості
-
-| Позначка | Достатній доказ | Межа |
-|---|---|---|
-| Відтворено | Контрольований сценарій відтворює симптом і різницю до/після | Поширюється на перевірені source/runtime/params |
-| Збережено | Фактичні BO значення перечитані після save/reload | Не доводить runtime delivery або результат користувача |
-| Перевірено в браузері | Фактичний iframe/context, loaded build і сценарій перевірено | Не замінює фізичний Safari чи native WebView |
-| Повідомлено | Є звіт користувача, QA або розробника | Без потрібного trace причина може лишатися гіпотезою |
-| Потребує перевірки | Є кандидат зміни або неповний proof | Не називаємо інцидент закритим |
-
-Позитивний compiler test та негативний фізичний тест можуть бути одночасно правильними: вони перевіряють різні етапи.
+У кожному випадку розділяємо: відтворений механізм, перечитану BO-конфігурацію, перевірений browser/device scenario та повідомлений симптом. Відсутність exact failing payload може лишити причину початкової доставки невстановленою навіть за успішної регресії. Рівні доказу та звіт PASS/FAIL/NOT_TESTED визначені в [QA](13-qa.md).
 
 ## 2. Popup: рендер, template runtime і зайві залежності
 
@@ -59,24 +25,15 @@
 
 Для другого випадку контрольований кандидат додавав лише п'ять символів — межу `%}{%` і переведення рядка перед конкретним фрагментом побудови script. Шість payload cases у JavaScriptCore дали результат, байт у байт однаковий із V8. Це **регресійний приклад**, а не правило вставляти таку межу в кожний popup чи обмежувати всі blocks вигаданим maximum size.
 
-Порядок дослідження:
+Для розрізнення цих механізмів потрібні exact delivered Body/params, wrapper і compiler revision; поточний BO export може вже відрізнятися. Порівнювати V8 та JavaScriptCore треба на однаковій vendor DOM assembly, а не на ручній підстановці рядків. Виконання actual compiler й перевірка збереженого артефакту — [runtime runbook](06-smartico-popup-templates.md).
 
-1. Знайти **точний доставлений** Body та params, wrapper і compiler version; відокремити їх від локального source і поточного BO export.
-2. У контексті самого popup перевірити наявність root, його дочірніх елементів, `tmpl`, vendor action handlers, runtime errors і фактичних script URLs.
-3. Запустити той самий compiler шляхом `tmpl('_template', params)`, з реальною template DOM assembly. Ручна підстановка рядків не перевіряє цей шлях.
-4. Розділити compile failure, DOM fill, CSS geometry, невидимість через opacity/overlay, asset/CSP/font errors. Не починати зі зміни socket або native renderer, якщо handshake уже підтверджено.
-5. Порівняти підтримувані engine families. Desktop Chrome pass недостатній для JavaScriptCore; локальний JavaScriptCore pass недостатній для фізичної інтеграції з її CSP і lifecycle.
-6. Після виправлення отримати збережений BO Body і **свіжу доставку**. Старий відкритий popup може продовжувати виконувати попередній код.
+Якщо старий failing Body відсутній, висновок обмежений: «Механізм відтворено й кандидат перевірено; причина початкового доставленого popup окремо не доведена».
 
-Якщо exact старий failing Body відсутній, чесний висновок: «Механізм відтворено й кандидат перевірено; причина початкового доставленого popup окремо не доведена».
+### 2.2. Fixture приховує помилку замість її відтворення
 
-### 2.2. Fixture має зберігати поведінку SDK
+Власний renderer із підстановкою params може пройти тест, хоча штатний wrapper падає. Для досліджених дефектів важливо було зберегти template element, `window.onload`, actual `tmpl` і штатне підключення action handlers. Підміна одного з цих етапів прибирає саме умову failure.
 
-Корисний local fixture відтворює фактичну vendor assembly: wrapper, template element, `window.onload`, compiler і штатне підключення action handlers. Snapshot має checksum/версію; повний SDK не потрібно довільно запускати поза його інтеграцією.
-
-Не підміняти vendor `tmpl`, onload або action attachment власним «простішим» renderer, щоб отримати зелений тест. Такий тест може втратити саме помилку продуктового сценарію.
-
-Fixture окремо документує відсутні складові: product CSP, identified session, parent SDK, Journey, grant endpoint, native presentation. Локальний logger deep links підтверджує тільки намір відправлення. Спостерігач, підключений після load, може пропустити ранню помилку; її додатково читають у DevTools потрібного frame. Відсутність застарілого `script.readyState` сама по собі не є помилкою завантаження.
+Fixture не має product CSP, identified session, Journey, bonus endpoint і native presentation. Logger deep links доводить тільки намір відправлення. Observer, доданий після load, може пропустити ранню помилку; її читають у DevTools потрібного frame. Відсутність застарілого `script.readyState` сама не доводить load failure. Для нового fixture використовувати [runnable compiler example](../smartico-popups/examples/README.md), явно записуючи його межі.
 
 ### 2.3. Body завеликий і залежить від непотрібного JS
 
@@ -94,26 +51,7 @@ Fixture окремо документує відсутні складові: pro
 
 Брендований SVG heading допустимий для точно затвердженого короткого арту, якщо є доступний HTML fallback і зміна тексту не лишає старе зображення. Це не універсальна заміна живих локалізованих текстів, descriptions або CTA.
 
-### 2.4. Вкладений script і delimiters
-
-У деяких legacy wrappers Body знаходиться всередині `<script type="text/x-tmpl">`. Буквальний closing script tag у source може достроково завершити цей зовнішній raw-text element **до** виконання template engine. Застосовувати лише перевірене template-safe складання; у контрольованому прикладі closing tag генерувався expression після compilation.
-
-Перевіряти source і rendered output окремо:
-
-- у literal CSS/HTML/JS немає випадкових `{% / %}`;
-- escaping не руйнує справжні template expressions;
-- outer template element не закривається завчасно;
-- rendered output має потрібну кількість scripts;
-- тексти з HTML, quotes і closing-script-послідовностями безпечно екрануються;
-- виправлення не змінює approved content/actions.
-
-Глобальна replace по готовому Body без розбору literal та template blocks може зруйнувати робочі expressions. Патчувати місце генерації, потім перевіряти кінцевий артефакт.
-
-### 2.5. Fullscreen і обрізання
-
-Симптом «popup маленький» може походити від outer iframe/WebView, centered wrapper, fit-scale або самого creative. Scoped CSS одного template може виправити observed wrapper shrink-wrap/zoom, але `100vw` і великий `z-index` не розширять його outer host.
-
-Перевіряти три рівні: outer bounds → wrapper geometry → content. Не змінювати глобальні site body styles через creative. Довгий контент, short landscape, safe areas, keyboard і text scaling потребують доступного scroll; один screenshot стандартного телефону цього не підтверджує.
+Виявлені під час очищення небезпеки literal delimiters, вкладеного closing script tag, escaping та outer frame sizing мають одну технічну інструкцію в [legacy runtime runbook](06-smartico-popup-templates.md). Їх перевіряємо на кінцевому exported Body; не підтримуємо другу копію compiler checklist тут.
 
 ## 3. Кнопки, хрестик і штатні обробники
 
@@ -139,75 +77,29 @@ Fixture окремо документує відсутні складові: pro
 
 Вибір guard policy залежить від supported acknowledgment і business contract. Якщо підтвердження прийняття немає, permanent local lock може забрати можливість повторити дію. Разом з тим blind retry може повторити grant. Потрібні state reconciliation, supported retry behavior і **серверна** idempotency/cap; сам JS latch її не створює.
 
-Під час review шукати:
-
-1. Два senders: vendor `href`/hook і паралельний `onclick _smartico.dp()`.
-2. Дублювання click та touch як двох бізнес-дій.
-3. Capture listeners, що блокують **перший** accepted event.
-4. Dead branches, timers і observers від попереднього способу взаємодії.
-5. Handler, який після нового render підключається вдруге.
-6. Закриття overlay або зняття scroll-lock, що очікує інший тип вікна.
-
-Не видаляти validation або server safeguards заради простішого click handler.
+При review шукати конкуруючі `href`/vendor hook і `_smartico.dp()`, подвійний click/touch sender, capture listener перед vendor delegation, повторне підключення після render та teardown, який чекає закриття іншого типу вікна. Видалення зайвого handler не скасовує server safeguards.
 
 ### 3.3. Діагностика може змінити поведінку
 
 При intermittent touch failure тимчасово збирали category counters `touchstart/touchend/click`, hit target, наявність helper і errors. Один фізичний сценарій після додавання passive listeners пройшов. Це не доводить, що passive listener «виправляє Safari».
 
-Потрібно:
-
-- інструментувати один етап, без PII й секретів;
-- не відправляти другий action із diagnostic handler;
-- відокремити functional listeners від UI журналу;
-- після видалення діагностики перевірити **саме release variant**;
-- зберегти результат і негативних, і позитивних повторів.
-
-Якщо діагностика зникла, а clean candidate на тому самому пристрої не перевірений, статус лишається «потребує фізичного повтору».
+Diagnostic handler не надсилає бізнес-дію й не змінює functional listeners. Після прибирання counters/UI журналу повторюється **clean release variant** на тому самому пристрої, із збереженням позитивних і негативних результатів. Без цього статус лишається «потребує фізичного повтору».
 
 ### 3.4. X, passive close і grant
 
-X не має універсальної семантики. Для одного state він може означати explicit close-and-claim, для іншого — лише close. Backdrop, Escape, native Back, swipe dismissal, reload і teardown — окремі випадки; їх не можна мовчки прирівнювати до явного X.
+Баг виник, коли loss state успадковував claim/navigation values. У Body й saved params зробили видимі дії close-only, додали X, а в кожному Journey occurrence — exact close connector до Stop. Claim/Risk виграшних states лишилися окремими. Змінити лише Body було недостатньо: старий creative override та graph продовжували задавати іншу поведінку.
 
-При зміні close behavior перевірити всю dependency chain:
+Однакова винагорода на Claim і explicit X не вимагала третього бонусу: різні connectors посилалися на ту саму перевірену bonus entity. Семантика X/backdrop/Escape/Back/reload визначається [action matrix](05b-smartico-journey-runbook.md); teardown не перетворюється на claim автоматично.
 
-```text
-Бізнес-рішення
- → visible controls / accessible labels
- → template defaults
- → saved creative params
- → exact tracked action
- → кожна popup activity occurrence
- → matching connector + close-original policy
- → grant / no grant
- → navigation / no navigation
- → analytics identity
-```
-
-Показовий виправлений випадок: loss state успадковував claim/navigation values. У Body і saved params зробили обидві видимі дії close-only, додали X, а в кожному відповідному Journey occurrence — exact close connector до Stop. Claim/Risk виграшних states лишилися окремими.
-
-Однакова номінальна винагорода на Claim і explicit X не вимагає окремого нового бонусу для X. Різні connectors можуть посилатися на ту саму перевірену bonus entity.
-
-**Старі engagements:** після зміни template старий відкритий popup може ще надіслати попередню tracked URL. Безпечний legacy connector, який лише завершує старий контекст без grant/navigation, може тимчасово залишатися потрібним. Його видалення потребує зрозумілої retirement/drain policy; «старий» не означає «можна видалити зараз».
+**Старі engagements:** відкритий до оновлення popup може ще надіслати попередню tracked URL. Safe legacy connector, який лише завершує старий контекст без grant/navigation, може тимчасово лишатися потрібним. Видалення потребує retirement/drain policy: «старий» не означає «зайвий».
 
 ## 4. Доставка: затримки, CAPs, черги й повторний вхід
 
 ### 4.1. Клік доходить до Journey, popup запізнюється або відхиляється
 
-Перевіряти механізми незалежно:
+У production інцидентах окремо знайшли великі label-level паузи після login/між popup і відмови `User/Global CAPs → Cannibalisation`. Це були різні причини delivery, а не доказ невиконаного депозиту чи financial cap. Правки обмежували timing і конкретним communication exception для user-requested prompt; bonus caps не обходили.
 
-| Механізм | Що контролює | Чого не доводить зміна |
-|---|---|---|
-| Delay after online/login | Frontend delivery timing для label | Швидкість конкретного bonus backend |
-| Pause before next popup | Інтервал презентації/черги | Порядок grant або його одноразовість |
-| Communication User/Global CAPs, category/cannibalisation | Допуск комунікації | Виконання deposit eligibility або bonus cap |
-| Popup delivery timeout | Зберігання/очікування доставки за vendor contract | Не є автоматично delay перед показом |
-| Popup suspension / URL exclusions | Хто й де може показати popup | Сам факт Journey entry |
-| Journey entry mode / maximum duration | Відкриті instances і повторний вступ | Atomic reward cap |
-| Bonus/backend limits | Фактичне нарахування | Гарантію, що popup уже показано |
-
-У production інцидентах окремо знаходили великі label-level паузи й `User/Global CAPs → Cannibalisation`. Правки робили на різних рівнях: timing, вузький communication exception для user-requested prompt, без обходу bonus caps.
-
-Не переносити observed значення пауз до всіх майбутніх акцій. Label-level зміна впливає на інші кампанії; per-activity exception не є дозволом вимкнути всі communication caps. Спочатку інвентаризувати scope й журнал причини відмови.
+Визначення queue, retention, suppression, communication caps і entry modes зібрані в [popup KB](../smartico-knowledge/04-popups-and-routing.md). Для інциденту зберігаємо actual reason і scope налаштування: зміна label-wide timing впливає також на інші кампанії. Observed значення пауз або exception не стають defaults нової акції.
 
 ### 4.2. Після повернення з каси приходить кілька popup
 
@@ -223,15 +115,9 @@ X не має універсальної семантики. Для одного
 
 ### 4.3. Once-open і Stop-and-Start вирішують різні проблеми
 
-`Once during open journey` може блокувати cross-device retry, поки старий popup/instance очікує завершення. `Stop and Start` дозволяє новий entry, але припиняє попередній flow; уже відправлений зовнішній bonus request при цьому може ще завершитися.
+У повторних тестах Once-open не допускав retry з іншої поверхні, поки старий instance очікував. Перехід на Stop-and-Start звільняв новий entry, але не доводив cancel уже відправленого external bonus request. Тест із двома вкладками міг синхронізувати **один** popup/session; один grant у ньому не підтверджував race-free роботу двох незалежних пристроїв.
 
-Не використовувати re-entry mode як заміну atomic per-user/campaign/cycle cap. Marker перед grant і marker після grant теж не створюють transactional exclusion.
-
-За збереженим primary contract окремої інтеграції Mark/Unmark та JS marker activity могли переходити по Then **до persistence**, а Update property — після збереження. Навіть підтверджений write не означає compare-and-set. Актуальні semantics перевірити для своєї activity/version.
-
-Так само issuance-id idempotency захищає replay **однієї** видачі; два незалежні entries можуть створити два issuance IDs. Дві вкладки часто синхронізують один popup/session і не є повноцінним тестом двох незалежних пристроїв із затриманою зовнішньою відповіддю.
-
-Детальніше: [Journey та rewards](../smartico-knowledge/03-journeys-and-rewards.md).
+Тому збережений re-entry mode і прийнятий практичний two-tab smoke не перетворені в гарантію «один бонус на user/cycle». Marker persistence, entry cap та issuance-id idempotency мають різні межі; їхній канонічний контракт і статус історичного primary source — у [Journey/rewards KB](../smartico-knowledge/03-journeys-and-rewards.md).
 
 ## 5. Стан, eligibility й відновлення спроби
 
@@ -239,48 +125,25 @@ X не має універсальної семантики. Для одного
 
 Причина: recurring mission opt-in/completion відбувся раніше, ніж перевірка qualifying deposit. Закриття інформаційного popup не повертало mission state.
 
-Виправлений design pattern:
+Флоу змінили так, щоб missing prerequisite показувала підказку без opt-in; лише відома доступність вела в основну operation входу з повторною server перевіркою. Інформаційний Client Action Journey мав окремий lifecycle без reward. Локальний help/FAQ лишався frontend, якщо не потребував CRM delivery.
 
-```text
-Identity / verification / prerequisite snapshot
- → unknown/error: без витрачання спроби
- → умову не виконано: інформаційна підказка без opt-in
- → умову виконано: одна operation входу
- → серверна повторна eligibility перевірка
- → основна механіка
-```
-
-Окремий Client Action Journey для підказки доречний, якщо потрібна CRM delivery. Локальний help/FAQ component також може бути правильним, якщо це суто інформаційний UI. Не створювати кілька Journey лише через різну візуальну модалку.
-
-Frontend preflight допомагає UX, але не вирішує race між read і action. Authoritative admission лишається на сервері.
+Схема й discovery-поля для наступної реалізації — [prerequisite pattern](21-promo-patterns.md). Frontend preflight покращує UX, але не є атомарною server admission.
 
 ### 5.2. Депозит є, а CTA ще просить поповнити
 
-Eligibility pipeline може мати кілька асинхронних етапів: approved product event → Smartico event → rule → server/public marker → public props → UI. Баланс або повернення з каси не замінюють qualifying event.
+У перевіреному профілі approved deposit і потрібний production marker вже існували, поки landing ще показував стару CTA. Користувач підтвердив, що доступність оновилась пізніше. Це вказувало на затримку projection/client refresh, а не на необхідність повторного депозиту.
 
-Порядок перевірки: exact identity/env → approved event і його час → rule filter/activation → потрібний тип marker → current props → subscription/refresh → UI generation/build.
+Порівнювали exact identity/ENV, час approved event, rule activation/filter, тип marker, current props, subscription та served UI revision. Initial `getPublicProps()` і `props_change` мали різні ролі; partial event без `core_public_tags` не мав стирати відомий стан, а malformed value не можна було прирівняти до відсутньої умови.
 
-Public JS marker і server Label Tag — різні представлення. В одному підтримуваному web SDK використовували initial `getPublicProps()` та `props_change`:
-
-| Відповідь | Коректна інтерпретація |
-|---|---|
-| Partial event без `core_public_tags` | Не змінювати відомий стан за відсутнім полем |
-| Initial snapshot ще без потрібних даних | Unknown/loading з bounded wait |
-| Коректний порожній масив | Відома відсутність marker |
-| Некоректний тип або items | Controlled error |
-| Потрібний exact marker | Умова UX виконана; server gate все одно потрібний |
-
-На logout/account switch subscriptions очищуються, late responses відкидаються. Не вручну додавати marker і не просити повторний депозит, якщо qualifying event уже підтверджений. Projection latency треба виміряти, а не вигадувати SLA.
+Merge/freshness правила живуть у [state KB](../smartico-knowledge/02-missions-and-state.md). Для цього інциденту не встановлено універсального SLA projection; ручне додавання marker приховало б початкову затримку.
 
 ### 5.3. Видалення marker не скинуло місію
 
-Mission completion, recurrence cycle, eligibility markers, open Journey instance й bonus ledger — окремі state machines.
+У тестовому профілі після видалення eligibility markers recurring mission лишалася completed. Нова спроба не з'явилася: marker removal не торкається mission progress і не скасовує open Journey або виданий bonus.
 
-Observed Journey reset action підтримувала Featured Manually, а не обрану recurring mission. Це не доказ, що жодний tenant/API ніколи не підтримує per-user recurring reset. Для рекомендації потрібен точний підтриманий механізм.
+Observed reset activity підтримувала Featured Manually, а не обрану recurring mission. Це не доказ універсальної відсутності per-user recurring reset; потрібний підтверджений tenant/type mechanism. Додатковий recurring run міг відкрити ще одну участь **всій** аудиторії, тому його не видали за reset одного account.
 
-Додатковий recurring run може почати новий цикл для **всієї** аудиторії й відкрити зайву участь. Не подавати його як нешкідливий reset одного QA account. Альтернативи: інший тестовий користувач, виділений QA цикл або підтверджений per-user mechanism.
-
-Для короткого QA repeat також перевіряти mission schedule, open Journey завершення та UI deadline разом. В одному label runs ближче години були відхилені; це observed capability, не універсальний Smartico minimum.
+Для прискореного QA runs ближче години в одному label були відхилені. Це observed validation, не global Smartico minimum. Перелік незалежних reset states і погодження server schedule/Journey bound/UI deadline — [reset pattern](21-promo-patterns.md).
 
 ### 5.4. Eligibility drift між UI і CRM
 
@@ -288,7 +151,7 @@ Observed Journey reset action підтримувала Featured Manually, а н�
 
 Зберігати одну business-condition mapping: approved правило → frontend provider → CRM/server condition → public projection → QA. Список verification markers одного бренду не стає universal KYC rule.
 
-Для monetary prerequisites описати один event чи cumulative sum, threshold/currency/status, event window, retention marker і reversal policy. Historical backfill та realtime rule — різні операції. Не запускати масову історичну обробку лише тому, що rule починає слухати нові events; QA/prod можуть містити однакові зовнішні user IDs.
+Окремий backfill інцидент показав, що включена historical processing може масово торкнутися неузгодженої QA-аудиторії; зовнішні user IDs при цьому можуть збігатися з Production. Realtime cutover і historical replay треба відрізняти до запуску. Поля qualifying event, backfill scope та environment isolation — [promo patterns](21-promo-patterns.md).
 
 ## 6. Scroll, перший клік, iframe і збереження прогресу
 
@@ -310,11 +173,9 @@ Action-only transport не є дозволом створити новий SDK/s
 
 ### 7.1. Успішний CI, але користувач бачить старий UI
 
-Перевіряти не лише Git commit: loaded iframe URL, served HTML, script/config versions, CDN headers, source hash і фактичний DOM. Старий HTML із новим JS може створити окрему runtime помилку. Уже відкритий popup не оновлюється лише через save Body.
+Після успішного CI траплялося поєднання старого HTML із новим JS/config, тому перевіряли **served** URLs/hash/DOM, а не тільки source commit. Окремо вже відкритий popup лишався зі старим кодом після BO save. Виправлення publication/cache належить [release runbook](14-release-and-cache.md).
 
-Постійне рішення — узгоджена HTML revalidation, версійовані assets і rollout policy. Cachebuster допомагає діагностиці, але не має вимагати від користувача щоразу міняти CMS URL. Точні правила — у [release/cache](14-release-and-cache.md).
-
-В іншому класі випадків сторінка редиректила **до появи iframe**, або document request стояв Stalled із нульовим Body. Це ще не landing JS/template failure; потрібна перевірка host route/network, а не оголошення «акція завершена».
+Інший схожий симптом мав інший шар: product page редиректила **до появи iframe**, або document request стояв Stalled із нульовим Body. Тут landing JS ще не виконувався; оголошувати акцію завершеною або міняти template не було підстав.
 
 ### 7.2. Stage залежності в production
 
@@ -328,24 +189,11 @@ State-safe defaults не мають приховано блокувати пра
 
 У copied flow знаходили broad mission trigger без exact ID, bypass eligibility, два `dp:ok` виходи для claim і risk, grant на Impression/Then, втрачений другий split та назви гілок, що не відповідали downstream role.
 
-Для кожної activity потрібні: фактична роль, source→target entity map, trigger/connector, terminal routes, side effects, grant owner, exact action і readback. Нова картинка або правильний popup ID не виправляє graph.
+Також archive/copy/relink могли зачепити descendants або parent connections, а editor autosave — зберегти випадково змінений connector. Перед наступними діями оглядали affected subtree/history й відновлювали точний попередній edge; нова картинка або правильний resource ID graph не виправляли.
 
-Відокремити:
+Procedure source→target mapping, node readback і activation ведеться в одному [Journey runbook](05b-smartico-journey-runbook.md). У regression після migration обов'язково включити згадані дефекти: exact mission filter, eligibility bypass, mutually exclusive actions, grant trigger, second split і reachable terminals.
 
-1. Перенесено source/template/creative.
-2. Збережено й перечитано BO config.
-3. Зв'язано всі occurrences.
-4. Перевірено graph і дати.
-5. Активовано потрібні об'єкти.
-6. Працює runtime на правильному build/profile.
-
-Archive/copy/relink можуть торкатися descendants або parent connections. Оглянути affected subtree перед зміною. Якщо editor autosave змінив connector не так, як планувалося, зупинити подальше редагування, перевірити history і відновити точний попередній стан за поточним scope. Не накладати ще один «виправний» edge без розуміння графа.
-
-### 7.4. Графічні дефекти й lifecycle
-
-Чорна/прозора база WebGL у WKWebView, видимий лише fallback або постер поверх відео мають різні причини. Перевіряти actual loaded build і canvas, initial opaque background, first successful draw, context loss/fallback, cached video already-playing state та poster ownership.
-
-Заміна картинки shader-ом не доводить менше навантаження. Зберігати reduced motion, offscreen/background pause, cleanup і actual GPU/device proof. [Media/WebGL](10-media-animation-webgl.md) містить технічні checks.
+Графічні класи з попередніх інтеграцій — poster над already-playing video, WebGL без темної основи в WKWebView, fallback без successful draw — мають окремі перевірки й fixes у [media/WebGL](10-media-animation-webgl.md). Їх не дублюємо як другий tutorial тут; жодний local shader pass не замінює actual GPU/device proof.
 
 ## 8. Видача бонусів і аналітика: типові помилкові висновки
 
@@ -365,108 +213,26 @@ Archive/copy/relink можуть торкатися descendants або parent co
 
 Коли затверджений контракт змінився з programmatic events на HTML `data-gtm-id`, старі producer/factory paths прибрали. Не лишати їх «про всяк випадок»: це створює competing ownership, зайві залежності й ризик подвійного send.
 
-DOM ID — hook для collector, а не вже отримана GA/Firebase подія. Cross-origin product GTM не бачить child DOM автоматично; popup iframe і native WebView мають власний collection context. Firebase restrictions стосуються destination event names; HTML ID не потрібно мовчки перейменовувати без mapping.
+Окремий баг виникав через порядок handlers: accepted click синхронно змінював UI і прибирав marker до delegated collector. В одному supported guard marker зберігали до кінця поточного event; в іншому cleanup timer заважав retry й був прибраний. Потрібний **actual collector-order test**, а не універсальний timer patch.
 
-При accepted click synchronous UI update може прибрати ID до delegated collector. В одному підтримуваному guard його зберігали до кінця поточного event; в іншому cleanup timer заважав retry й був прибраний. Тестувати **actual collector order**, не копіювати timer як обов'язковий рецепт.
+Collection modes, cross-origin collector ownership і destination mapping — [analytics guide](12-analytics.md). Випадки помилкового трактування entries/users, late Failed після успіху, prerequisites/conversions, cost0 та невідповідності Flow/journal зібрано в [reporting KB](../smartico-knowledge/05-investigation-and-analytics.md). Це один словник метрик, а не окремий у кожному incident doc.
 
-Для звітів:
+## 9. Безпечна редукція наявного popup
 
-- Flow entries/transitions не дорівнюють унікальним людям або фактичним grants.
-- Historical Failed може передувати пізнішому успіху, а запис надійти пізніше; failure total не дорівнює остаточно втраченим користувачам.
-- Date range, timezone, completed-days window, filters і denominator кожного % мають бути явні.
-- Qualifying deposit до входу й conversion deposit після входу — різні події.
-- Control group off не доводить incremental uplift; Bonus Cost0 може означати відсутність cost integration.
-- Невідповідність aggregate та журналу зберігати як unresolved reconciliation, не підганяти narrative під бажаний висновок.
+Це порядок **видалення коду й залежностей**, не друга інструкція створення popup. Setup/deliverables визначає [implementation contract](../smartico-popups/implementation-contract.md), compiler — [runtime runbook](06-smartico-popup-templates.md), affected proof — [QA](13-qa.md).
 
-Повний contract: [analytics](12-analytics.md), [investigation/analytics knowledge](../smartico-knowledge/05-investigation-and-analytics.md).
+| Крок | Що зробити до переходу далі |
+|---|---|
+| 1. Підтвердити active source | Manifest/build entry → generated artifact → served revision → saved BO Body/config/params. Prototype поруч із `app/` не стає runtime source. Зберегти known-good/rollback artifact |
+| 2. Назвати owners | По одному owner SDK/session, business sender, input, render/motion, positioning/scroll, state і analytics. Перевірити callers, imports/exports, generated output та fixtures перед видаленням |
+| 3. Довести зайвість | Кандидати: base64 зі стабільною зовнішньою заміною; непотрібна script serialization; відкинутий analytics producer; duplicate senders/latches; obsolete observers; Stage/Figma fallback chains; недосяжні branches без consumers |
+| 4. Зберегти сумісність | Зміна проходить source/generator → Body → defaults → saved values → assets → усі activity occurrences → branch mapping. Open engagements можуть потребувати тимчасового safe legacy connector із drain policy |
+| 5. Прогнати affected regression | Actual engine/DOM assembly; states/locales/minimal/escaped params; 0/1/2 controls; first/mixed clicks; blocked resources; clean release без diagnostic observer. Grant/concurrency підтверджуються окремим server proof |
+| 6. Звірити доставку й вимір | Re-open/download/hash, свіжа Web delivery, потрібний physical-device test. Окремо Body/gzip, external selected bytes і decoded memory: менший Body не обов'язково означає менший homepage cost |
+| 7. Записати результат | Що вилучено і чому; що збережено за contract; cause confidence; before/after regression; BO/served revision; Web/iOS/Android proof та remaining gaps у [investigation record](../templates/investigation-record.md) |
 
-## 9. Порядок безпечного очищення й переналаштування
+Local preview, fixtures, rollback record і safe compatibility connector не є runtime bloat автоматично. Canonical bridge/vendor wrapper, validation та server caps не видаляються як «зайвий код». Після заміни positioning або sender перевірити, що старі observers/locks/handlers також прибрано, але чужі host subscriptions не очищуються.
 
-Це послідовність для affected code та знайденої проблеми. Вона не вимагає переписати всі modal templates.
+«Налаштування збережено», «engine пройшов» і «гравець отримав бонус» — різні результати. Позитивний candidate із diagnostic listener не закриває дефект clean release.
 
-### Крок 1. Зафіксувати джерела й поведінку
-
-Знайти active source/build, existing BO entities, published Body/config/params, wrapper/runtime та usage list. Старий prototype може лежати поруч із новим Nuxt application; факт існування файлу не робить його production source.
-
-Зберегти мінімальний rollback artifact, known-good state і невирішені runtime gaps. Описати functional invariants: visible states, first click, close/claim/risk, keyboard/touch, fallback, localization, resource origins, server grant/caps і navigation.
-
-### Крок 2. Знайти owners і залежності
-
-| Відповідальність | Один явний owner | Що перевірити при видаленні |
-|---|---|---|
-| SDK/session | Підтримана identified integration | Чи не створено дублюючий socket/SDK |
-| Business action | Vendor hook або погоджений sender | Чи не лишиться другий send на touch/click/href |
-| UI input | Один interaction controller | Keyboard, hit area, retries і gestures |
-| Render/motion | Creative/component lifecycle | Core content без декоративного JS |
-| Position/scroll | Узгоджений host або scene owner | Чи лишилися старі observers/locks |
-| State | Authoritative provider + current generation | Error/unknown, identity switch, stale response |
-| Analytics | Один затверджений collector mode | Немає competing producer і втрати first click |
-
-Перевірити callers, generated output, params і tests перед видаленням. Не прибирати canonical bridge/vendor wrapper або server validation як «зайвий код».
-
-### Крок 3. Прибрати підтверджену зайву складність
-
-Кандидати, якщо їхня зайвість підтверджена:
-
-- великі embedded resources, які мають стабільне зовнішнє джерело;
-- script assembly через serialization, якщо той самий результат дає просте перевірене складання;
-- старий analytics producer після вибору DOM mode;
-- дубльовані senders, click/touch latches і callbacks, яких більше не використовує contract;
-- obsolete positioning/resize observers після зміни моделі;
-- Stage/Figma/landing fallback URLs у release assets;
-- недосяжні branches і старі imports/exports без consumers.
-
-Local preview, test fixtures і historical compatibility connector не є runtime bloat автоматично. Потрібно довести, що вони завантажуються або виконуються зайво. Виносити історичні записи із current instructions, не знищуючи доказів.
-
-### Крок 4. Узгодити все, що переживає зміну коду
-
-Виправити source/generator → Body → Configuration defaults → saved creative values → assets → усі activity occurrences → action/branch mapping → analytics hooks → QA/release record.
-
-Нова Body версія не стирає старі creative params. Новий URL asset не змінює вже відкритий popup. Заміна дати в landing не змінює mission/Journey schedules. Profile/ENV routing перевірити в кожному шарі.
-
-### Крок 5. Перевірити регресії, які реально можуть зламатися
-
-Для legacy templates:
-
-1. Actual pinned compiler і DOM assembly; потрібні V8/JavaScriptCore перевірки.
-2. States, missing/null/escaped/long payloads, explicit optional=false, 0/1/2 controls, stale saved values і locales.
-3. Low height/landscape/safe areas/text zoom; all visible CTA hit areas.
-4. First accepted click, повторні/mixed clicks, keyboard, supported native Back/passive dismiss.
-5. Blocked/slow fonts/images/custom scripts, reduced motion, repeated fresh/cached show.
-6. Відсутність зайвого send/producer і правильний collector order.
-7. Grant/failure/pending/navigation через authoritative backend; дві вкладки й independent devices за risk scope.
-
-Не робити один native happy path заміною compiler regression або навпаки.
-
-### Крок 6. Зберегти й перевірити фактичну доставку
-
-Save → re-open/download → source/hash comparison → preview → fresh Web delivery → supported physical platforms. Перевірити status і execution окремо; cached old engagement, label delays, caps, queue, scroll та routing також входять у відповідний smoke.
-
-Вимірювання записати окремо: Body bytes/gzip, custom JS, external selected transfer, decoded media memory, compile/render time. Число тестів саме по собі не є доказом повного UX.
-
-### Крок 7. Закрити результат із межами доказів
-
-Підсумковий запис:
-
-```text
-Симптом і точна версія:
-Причина / ступінь впевненості:
-Мінімальна фактична зміна:
-Що прибрано і чому це зайве:
-Що збережено за контрактом:
-BO readback / served build:
-Регресія до/після:
-Web / iOS / Android evidence:
-Невирішені питання та спосіб наступної перевірки:
-```
-
-«Налаштування збережено», «локальний engine пройшов», «фізичний користувач отримав бонус» — різні результати. Не об'єднувати їх словом «усе виправлено».
-
-## 10. Як використовувати каталог у наступній задачі
-
-Для питання про баг агент спочатку вибирає етап із розділу1, знаходить відповідний incident pattern, читає product profile/current contract і отримує потрібний proof. Потім пропонує конкретну найменшу зміну з перевіркою її consumers.
-
-Підтверджені механізми стають правилами; невстановлені причини — investigation recipes. Не переносити до нової кампанії старий parser workaround, click latch, CAP exception, delayed retry або brand marker лише тому, що колись він був частиною виправлення.
-
-Інші первинні матеріали: [Smartico public API](https://github.com/smarticoai/public-api), [native protocol](https://github.com/smarticoai/public-api/blob/main/docs/native/PROTOCOL.md), [template engine](https://github.com/smarticoai/JavaScript-Templates), [Bonus API](https://help.smartico.ai/welcome/technical-guides/bonus-api-integration). Актуальність і межі доступності джерел фіксуються у [реєстрі knowledge base](../smartico-knowledge/README.md); приватні докази інцидентів лишаються у project kit.
-
+Підтверджені механізми стають regression rules; невстановлені причини лишаються investigation recipes. Актуальні первинні джерела та їхній статус — [Smartico catalog](../smartico-knowledge/SOURCES.md); приватні докази інцидентів залишаються у project kit.

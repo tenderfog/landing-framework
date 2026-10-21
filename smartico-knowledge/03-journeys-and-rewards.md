@@ -19,22 +19,13 @@ Automation rule підходить для простого event → condition �
 
 Зупинка Journey не є транзакційним cancel зовнішнього Bonus API. Якщо request уже пішов у платформу, він може завершитись після нового entry. Тому reopen policy і retry policy проєктуються разом із reconciliation bonus status.
 
-## Blueprint кожного кроку
+## Flow contract і процедура
 
-| Поле | Що зафіксувати |
-|---|---|
-| Entry | Exact event/action, mission type/ID у приватному kit, payload filters |
-| Audience | Brand, ENV, тестові обмеження, eligibility, excluded users |
-| Branch | Умова, priority, else/default, ймовірність за наявності |
-| Communication | Resource/variation, timeout, caps, delivery policy |
-| Click | Exact rendered action та matched connector, close/Back semantics |
-| Wait | Event, condition, deadline, success та timeout paths |
-| Grant | Template mapping, amount/currency, owner, success/pending/failure |
-| Completion | Що спожито, що записано, коли дозволений re-entry |
+Єдиний реєстр entry/audience/branch/communication/click/wait/grant/completion заповнюється у [Smartico blueprint](../templates/smartico-blueprint.md). BO sequence, worked graph, exact connector matching і save/readback — у [Journey runbook](../docs/05b-smartico-journey-runbook.md).
 
-`Check User Profile` перевіряє поточні profile values; `Wait for Event` очікує нову подію з timeout. Не використовуй перше як нескінченне очікування другого. [Check User Profile](https://help.smartico.ai/welcome/products/crm-automation/activities-of-flows/activity-check-user-profile), [Wait for Event](https://help.smartico.ai/welcome/products/crm-automation/activities-of-flows/activity-wait-for-event).
+`Check User Profile` перевіряє поточні values; `Wait for Event` очікує нову подію з timeout. Перше не є нескінченним очікуванням другого. [Check User Profile](https://help.smartico.ai/welcome/products/crm-automation/activities-of-flows/activity-check-user-profile), [Wait for Event](https://help.smartico.ai/welcome/products/crm-automation/activities-of-flows/activity-wait-for-event).
 
-Кожен outcome має завершений шлях: eligible/ineligible, win/loss, claim/risk, close, delivery failure, timeout, grant failure. Blank connector — не узгоджена бізнес-поведінка. Для branch probability перевіряй очікувану модель і достатність вибірки; невелике відхилення live-counts від пропорції саме по собі не доводить збій.
+Кожен реальний outcome має terminal/recovery path: ineligible, choice, passive close, delivery/claim timeout, grant failure. Blank connector не є погодженою поведінкою. Імовірність і sampling model беруться з business contract; невелике відхилення live-counts саме по собі не доводить збій.
 
 ## Дії з markers не є atomic lock
 
@@ -54,6 +45,12 @@ Automation rule підходить для простого event → condition �
 Офіційний [Bonus API integration](https://help.smartico.ai/welcome/technical-guides/bonus-api-integration) розрізняє автоматичну видачу та claimable voucher; lifecycle включає New, Coupon Issued, Redeemed, Redeem Failed, Expired. `Redeemed` означає успішний partner API result у цьому контракті. Це не доказ використання гравцем і не універсальна назва всіх BO branch outcomes.
 
 Документація вимагає idempotency за **`smartico_bonus_id`**: повтор того самого request не має повторно видати бонус. Але два окремі entries можуть створити два різні issuance IDs. Тому API retry idempotency не забезпечує «одна винагорода за campaign/cycle». Останнє — окремий business invariant з визначеним server owner.
+
+## Цикл спроби й день видачі
+
+`grantDayBasis` у власному blueprint визначає календарний цикл спроби або день фактичної видачі. Це business field, не гарантований vendor API parameter. Pending popup до півночі може бути claimed після reset; нова денна спроба теж може завершитися тієї самої дати. Один entry на цикл тому не доводить один grant за фактичний local day.
+
+Якщо правила забороняють дві такі видачі, потрібен atomic server cap по user + campaign + визначеному дню/timezone з pending/failed/retry policy. Недостатня BO capability стає backend dependency. Уже підтверджена винагорода не губиться через reset; QA boundary: pending до reset → Claim/X після → новий entry.
 
 ## Ліміти перевіряються незалежно
 

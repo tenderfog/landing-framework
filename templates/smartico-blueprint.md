@@ -1,5 +1,7 @@
 # Smartico blueprint — mission або Client Action
 
+Business facts, approved dates/timezone, rewards і prerequisites: посилання на [project brief](project-brief.md), revision ___. Тут фіксуються їхній **фактичний CRM mapping/readback** та відмінності QA/Prod, без незалежної копії бізнес-правил. Technical transports/schemas посилаються на [integration contract](integration-contract.md).
+
 ## Entity map
 
 | Entity | Internal Latin name | ENV/label/brand | ID/key | Current status | Source/owner |
